@@ -15,7 +15,10 @@ Flutter app, Android first (iOS-ready structure). Dark, cyberpunk-inspired theme
 - ✅ Bill entry, live totals, results, copy & share, accent colors
 - ✅ History (auto-saved, offline SQLite, sync-ready), search, multiple tags per bill
 - ✅ Add people from contacts; send each person their share via WhatsApp or SMS
-- ⏳ Monthly reports, saved message templates, settings
+- ✅ Monthly report of your own share, by tag, with recent months
+- ✅ Saved message templates (one default), placeholders, live preview
+- ✅ Settings: your name (auto-marks "Me"), default currency, country code
+- ⏳ App icon, Phase 4 review (accessibility, edge cases, iOS readiness)
 
 ## Run
 ```sh

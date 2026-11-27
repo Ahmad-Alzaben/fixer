@@ -1,10 +1,12 @@
 import 'package:fixer/core/widgets/app_shell.dart';
-import 'package:fixer/core/widgets/coming_soon.dart';
 import 'package:fixer/features/bill/presentation/split_screen.dart';
 import 'package:fixer/features/history/presentation/history_screen.dart';
+import 'package:fixer/features/messaging/domain/message_template.dart';
+import 'package:fixer/features/messaging/presentation/template_editor_screen.dart';
+import 'package:fixer/features/messaging/presentation/templates_screen.dart';
+import 'package:fixer/features/reports/presentation/reports_screen.dart';
 import 'package:fixer/features/results/presentation/results_screen.dart';
 import 'package:fixer/features/settings/presentation/settings_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +16,8 @@ abstract final class Routes {
   static const history = '/history';
   static const reports = '/reports';
   static const settings = '/settings';
+  static const templates = '/settings/templates';
+  static const editTemplate = '/settings/templates/edit';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -49,11 +53,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.reports,
-                builder: (_, _) => const ComingSoon(
-                  title: 'Reports',
-                  icon: Icons.bar_chart,
-                  message: 'Your monthly spending will appear here.',
-                ),
+                builder: (_, _) => const ReportsScreen(),
               ),
             ],
           ),
@@ -62,6 +62,20 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.settings,
                 builder: (_, _) => const SettingsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'templates',
+                    builder: (_, _) => const TemplatesScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'edit',
+                        builder: (_, state) => TemplateEditorScreen(
+                          template: state.extra as MessageTemplate?,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

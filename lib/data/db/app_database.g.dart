@@ -2325,6 +2325,461 @@ class BillTagsCompanion extends UpdateCompanion<BillTagRow> {
   }
 }
 
+class $MessageTemplatesTable extends MessageTemplates
+    with TableInfo<$MessageTemplatesTable, TemplateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MessageTemplatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDefaultMeta = const VerificationMeta(
+    'isDefault',
+  );
+  @override
+  late final GeneratedColumn<bool> isDefault = GeneratedColumn<bool>(
+    'is_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_default" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    body,
+    isDefault,
+    position,
+    updatedAt,
+    deletedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'message_templates';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TemplateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('is_default')) {
+      context.handle(
+        _isDefaultMeta,
+        isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TemplateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TemplateRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      isDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_default'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+    );
+  }
+
+  @override
+  $MessageTemplatesTable createAlias(String alias) {
+    return $MessageTemplatesTable(attachedDatabase, alias);
+  }
+}
+
+class TemplateRow extends DataClass implements Insertable<TemplateRow> {
+  final String id;
+  final String name;
+  final String body;
+  final bool isDefault;
+  final int position;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const TemplateRow({
+    required this.id,
+    required this.name,
+    required this.body,
+    required this.isDefault,
+    required this.position,
+    required this.updatedAt,
+    this.deletedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['body'] = Variable<String>(body);
+    map['is_default'] = Variable<bool>(isDefault);
+    map['position'] = Variable<int>(position);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  MessageTemplatesCompanion toCompanion(bool nullToAbsent) {
+    return MessageTemplatesCompanion(
+      id: Value(id),
+      name: Value(name),
+      body: Value(body),
+      isDefault: Value(isDefault),
+      position: Value(position),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory TemplateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TemplateRow(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      body: serializer.fromJson<String>(json['body']),
+      isDefault: serializer.fromJson<bool>(json['isDefault']),
+      position: serializer.fromJson<int>(json['position']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'body': serializer.toJson<String>(body),
+      'isDefault': serializer.toJson<bool>(isDefault),
+      'position': serializer.toJson<int>(position),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  TemplateRow copyWith({
+    String? id,
+    String? name,
+    String? body,
+    bool? isDefault,
+    int? position,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+  }) => TemplateRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    body: body ?? this.body,
+    isDefault: isDefault ?? this.isDefault,
+    position: position ?? this.position,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+  );
+  TemplateRow copyWithCompanion(MessageTemplatesCompanion data) {
+    return TemplateRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      body: data.body.present ? data.body.value : this.body,
+      isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+      position: data.position.present ? data.position.value : this.position,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TemplateRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('body: $body, ')
+          ..write('isDefault: $isDefault, ')
+          ..write('position: $position, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, body, isDefault, position, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TemplateRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.body == this.body &&
+          other.isDefault == this.isDefault &&
+          other.position == this.position &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class MessageTemplatesCompanion extends UpdateCompanion<TemplateRow> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> body;
+  final Value<bool> isDefault;
+  final Value<int> position;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const MessageTemplatesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.body = const Value.absent(),
+    this.isDefault = const Value.absent(),
+    this.position = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MessageTemplatesCompanion.insert({
+    required String id,
+    required String name,
+    required String body,
+    this.isDefault = const Value.absent(),
+    required int position,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       body = Value(body),
+       position = Value(position),
+       updatedAt = Value(updatedAt);
+  static Insertable<TemplateRow> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? body,
+    Expression<bool>? isDefault,
+    Expression<int>? position,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (body != null) 'body': body,
+      if (isDefault != null) 'is_default': isDefault,
+      if (position != null) 'position': position,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MessageTemplatesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? body,
+    Value<bool>? isDefault,
+    Value<int>? position,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return MessageTemplatesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      body: body ?? this.body,
+      isDefault: isDefault ?? this.isDefault,
+      position: position ?? this.position,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (isDefault.present) {
+      map['is_default'] = Variable<bool>(isDefault.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageTemplatesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('body: $body, ')
+          ..write('isDefault: $isDefault, ')
+          ..write('position: $position, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2333,6 +2788,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ItemsTable items = $ItemsTable(this);
   late final $TagsTable tags = $TagsTable(this);
   late final $BillTagsTable billTags = $BillTagsTable(this);
+  late final $MessageTemplatesTable messageTemplates = $MessageTemplatesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2343,6 +2801,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     items,
     tags,
     billTags,
+    messageTemplates,
   ];
 }
 
@@ -4519,6 +4978,246 @@ typedef $$BillTagsTableProcessedTableManager =
       BillTagRow,
       PrefetchHooks Function({bool billId, bool tagId})
     >;
+typedef $$MessageTemplatesTableCreateCompanionBuilder =
+    MessageTemplatesCompanion Function({
+      required String id,
+      required String name,
+      required String body,
+      Value<bool> isDefault,
+      required int position,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+typedef $$MessageTemplatesTableUpdateCompanionBuilder =
+    MessageTemplatesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> body,
+      Value<bool> isDefault,
+      Value<int> position,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+
+class $$MessageTemplatesTableFilterComposer
+    extends Composer<_$AppDatabase, $MessageTemplatesTable> {
+  $$MessageTemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MessageTemplatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MessageTemplatesTable> {
+  $$MessageTemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MessageTemplatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MessageTemplatesTable> {
+  $$MessageTemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDefault =>
+      $composableBuilder(column: $table.isDefault, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$MessageTemplatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MessageTemplatesTable,
+          TemplateRow,
+          $$MessageTemplatesTableFilterComposer,
+          $$MessageTemplatesTableOrderingComposer,
+          $$MessageTemplatesTableAnnotationComposer,
+          $$MessageTemplatesTableCreateCompanionBuilder,
+          $$MessageTemplatesTableUpdateCompanionBuilder,
+          (
+            TemplateRow,
+            BaseReferences<_$AppDatabase, $MessageTemplatesTable, TemplateRow>,
+          ),
+          TemplateRow,
+          PrefetchHooks Function()
+        > {
+  $$MessageTemplatesTableTableManager(
+    _$AppDatabase db,
+    $MessageTemplatesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MessageTemplatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MessageTemplatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MessageTemplatesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MessageTemplatesCompanion(
+                id: id,
+                name: name,
+                body: body,
+                isDefault: isDefault,
+                position: position,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String body,
+                Value<bool> isDefault = const Value.absent(),
+                required int position,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MessageTemplatesCompanion.insert(
+                id: id,
+                name: name,
+                body: body,
+                isDefault: isDefault,
+                position: position,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MessageTemplatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MessageTemplatesTable,
+      TemplateRow,
+      $$MessageTemplatesTableFilterComposer,
+      $$MessageTemplatesTableOrderingComposer,
+      $$MessageTemplatesTableAnnotationComposer,
+      $$MessageTemplatesTableCreateCompanionBuilder,
+      $$MessageTemplatesTableUpdateCompanionBuilder,
+      (
+        TemplateRow,
+        BaseReferences<_$AppDatabase, $MessageTemplatesTable, TemplateRow>,
+      ),
+      TemplateRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4532,4 +5231,6 @@ class $AppDatabaseManager {
   $$TagsTableTableManager get tags => $$TagsTableTableManager(_db, _db.tags);
   $$BillTagsTableTableManager get billTags =>
       $$BillTagsTableTableManager(_db, _db.billTags);
+  $$MessageTemplatesTableTableManager get messageTemplates =>
+      $$MessageTemplatesTableTableManager(_db, _db.messageTemplates);
 }

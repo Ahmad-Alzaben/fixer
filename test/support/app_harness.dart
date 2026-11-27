@@ -6,6 +6,7 @@ import 'package:fixer/features/bill/application/auto_save.dart';
 import 'package:fixer/features/bill/application/providers.dart';
 import 'package:fixer/features/contacts/contacts_gateway.dart';
 import 'package:fixer/features/messaging/application/message_launcher.dart';
+import 'package:fixer/features/messaging/application/template_repository.dart';
 import 'package:fixer/features/settings/application/settings_providers.dart';
 import 'package:fixer/features/settings/data/prefs_settings_repository.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,8 @@ class Harness {
   final share = FakeShareGateway();
   final bills = FakeBillRepository();
   final tags = FakeTagRepository();
+  final templates = FakeTemplateRepository();
+  Map<String, Object> storedSettings = {};
   final contacts = FakeContactsGateway();
   final launcher = FakeMessageLauncher();
 }
@@ -67,9 +70,9 @@ Future<Harness> pumpApp(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 
-  SharedPreferences.setMockInitialValues({});
-  final prefs = await SharedPreferences.getInstance();
   final h = harness ?? Harness();
+  SharedPreferences.setMockInitialValues(h.storedSettings);
+  final prefs = await SharedPreferences.getInstance();
   var next = 0;
   await tester.pumpWidget(
     ProviderScope(
@@ -82,6 +85,7 @@ Future<Harness> pumpApp(
         clockProvider.overrideWithValue(() => testNow),
         billRepositoryProvider.overrideWithValue(h.bills),
         tagRepositoryProvider.overrideWithValue(h.tags),
+        templateRepositoryProvider.overrideWithValue(h.templates),
         contactsGatewayProvider.overrideWithValue(h.contacts),
         messageLauncherProvider.overrideWithValue(h.launcher),
         autoSaveDelayProvider.overrideWithValue(Duration.zero),

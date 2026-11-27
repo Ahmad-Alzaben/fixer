@@ -4,9 +4,11 @@ import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/bill/domain/bill_calculation.dart';
 import 'package:fixer/features/messaging/application/message_launcher.dart';
 import 'package:fixer/features/messaging/application/message_values.dart';
+import 'package:fixer/features/messaging/application/template_repository.dart';
 import 'package:fixer/features/messaging/domain/message_template.dart';
 import 'package:fixer/features/messaging/domain/phone.dart';
 import 'package:fixer/features/messaging/domain/send_links.dart';
+import 'package:fixer/features/settings/application/settings_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,22 +44,37 @@ class _SendSheet extends ConsumerStatefulWidget {
 }
 
 class _SendSheetState extends ConsumerState<_SendSheet> {
-  late final TextEditingController _message;
+  final _message = TextEditingController();
+  List<MessageTemplate> _templates = const [MessageTemplate.builtIn];
+  String? _templateId;
 
   @override
   void initState() {
     super.initState();
-    // Saved templates arrive in the next phase; until then the built-in
-    // default is used and the text can be edited freely here.
-    final template = MessageTemplate.pickDefault(const []);
-    _message = TextEditingController(
-      text: template.render(
-        messageValues(
-          bill: widget.bill,
-          calculation: widget.calculation,
-          person: widget.person,
-          date: widget.bill.createdAt ?? ref.read(clockProvider)(),
-        ),
+    _apply(MessageTemplate.builtIn);
+    // Start from the saved default once templates load (usually at once).
+    ref.listenManual(templatesProvider, (_, next) {
+      final list = next.value;
+      if (list == null || list.isEmpty) return;
+      final firstLoad =
+          _templateId == MessageTemplate.builtIn.id &&
+          !list.any((t) => t.id == MessageTemplate.builtIn.id && t.isDefault);
+      setState(() => _templates = list);
+      if (firstLoad || !list.any((t) => t.id == _templateId)) {
+        _apply(MessageTemplate.pickDefault(list));
+      }
+    }, fireImmediately: true);
+  }
+
+  /// Replaces the message with [template] filled in for this person.
+  void _apply(MessageTemplate template) {
+    _templateId = template.id;
+    _message.text = template.render(
+      messageValues(
+        bill: widget.bill,
+        calculation: widget.calculation,
+        person: widget.person,
+        date: widget.bill.createdAt ?? ref.read(clockProvider)(),
       ),
     );
   }
@@ -85,7 +102,10 @@ class _SendSheetState extends ConsumerState<_SendSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final phone = widget.person.phone;
-    final digits = phone == null ? null : normalizePhone(phone);
+    final countryCode = ref.watch(preferencesProvider).countryCode;
+    final digits = phone == null
+        ? null
+        : normalizePhone(phone, defaultCountryCode: countryCode);
     return Padding(
       padding: EdgeInsets.fromLTRB(
         Gap.l,
@@ -109,6 +129,21 @@ class _SendSheetState extends ConsumerState<_SendSheet> {
             ),
           ),
           const SizedBox(height: Gap.m),
+          if (_templates.length > 1) ...[
+            DropdownButtonFormField<String>(
+              key: const ValueKey('template-picker'),
+              initialValue: _templateId,
+              decoration: const InputDecoration(labelText: 'Template'),
+              items: [
+                for (final t in _templates)
+                  DropdownMenuItem(value: t.id, child: Text(t.name)),
+              ],
+              onChanged: (id) => setState(
+                () => _apply(_templates.firstWhere((t) => t.id == id)),
+              ),
+            ),
+            const SizedBox(height: Gap.m),
+          ],
           TextField(
             controller: _message,
             minLines: 4,

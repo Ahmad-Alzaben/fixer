@@ -5,6 +5,7 @@ import 'package:fixer/core/money/money.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/bill/domain/bill_calculation.dart';
 import 'package:fixer/features/bill/domain/bill_calculator.dart';
+import 'package:fixer/features/settings/application/settings_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The bill currently being edited on the Split tab.
@@ -29,7 +30,7 @@ class BillEditor extends Notifier<Bill> {
   @override
   Bill build() => Bill(
     id: _newId(),
-    currency: Currency.defaultCurrency,
+    currency: ref.read(preferencesProvider).defaultCurrency,
     people: const [],
     createdAt: _now(),
   );
@@ -91,9 +92,17 @@ class BillEditor extends Notifier<Bill> {
   /// Adds a person and returns their id. [phone] and [contactId] are set when
   /// the person comes from the phone's contacts.
   String addPerson(String name, {String? phone, String? contactId}) {
+    final valid = _validName(name);
+    final yourName = ref.read(preferencesProvider).yourName;
+    // Your own name marks you as "Me" (for reports), unless someone already is.
+    final isMe =
+        yourName != null &&
+        valid.toLowerCase() == yourName.toLowerCase() &&
+        state.me == null;
     final person = Person(
       id: _newId(),
-      name: _validName(name),
+      name: valid,
+      isMe: isMe,
       phone: phone,
       contactId: contactId,
     );

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:fixer/features/messaging/domain/message_template.dart';
 
 part 'app_database.g.dart';
 
@@ -78,6 +79,20 @@ class BillTags extends Table {
   Set<Column> get primaryKey => {billId, tagId};
 }
 
+@DataClassName('TemplateRow')
+class MessageTemplates extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get body => text()();
+  BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+  IntColumn get position => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Default categories. Fixed ids so they match across devices after sync.
 const defaultTags = [
   ('tag-food', 'Food'),
@@ -89,15 +104,16 @@ const defaultTags = [
   ('tag-other', 'Other'),
 ];
 
-@DriftDatabase(tables: [Bills, People, Items, Tags, BillTags])
+@DriftDatabase(tables: [Bills, People, Items, Tags, BillTags, MessageTemplates])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// The on-device database file (`fixer.sqlite` in app documents).
   factory AppDatabase.onDevice() => AppDatabase(driftDatabase(name: 'fixer'));
 
+  // v1: bills, people, items, tags. v2: message templates.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -117,9 +133,28 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       });
+      await _seedDefaultTemplate(now);
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(messageTemplates);
+        await _seedDefaultTemplate(DateTime.now());
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  Future<void> _seedDefaultTemplate(DateTime now) =>
+      into(messageTemplates).insert(
+        MessageTemplatesCompanion.insert(
+          id: MessageTemplate.builtIn.id,
+          name: MessageTemplate.builtIn.name,
+          body: MessageTemplate.builtIn.body,
+          isDefault: const Value(true),
+          position: 0,
+          updatedAt: now,
+        ),
+      );
 }
