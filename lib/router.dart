@@ -1,6 +1,7 @@
 import 'package:fixer/core/widgets/app_shell.dart';
 import 'package:fixer/core/widgets/coming_soon.dart';
 import 'package:fixer/features/bill/presentation/split_screen.dart';
+import 'package:fixer/features/history/presentation/history_screen.dart';
 import 'package:fixer/features/results/presentation/results_screen.dart';
 import 'package:fixer/features/settings/presentation/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -40,11 +41,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.history,
-                builder: (_, _) => const ComingSoon(
-                  title: 'History',
-                  icon: Icons.history,
-                  message: 'Saved bills will appear here.',
-                ),
+                builder: (_, _) => const HistoryScreen(),
               ),
             ],
           ),

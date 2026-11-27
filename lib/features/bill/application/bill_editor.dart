@@ -1,3 +1,4 @@
+import 'package:fixer/core/clock.dart';
 import 'package:fixer/core/ids.dart';
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/money/money.dart';
@@ -23,12 +24,42 @@ final billCalculationProvider = Provider<BillCalculation>(
 /// Editing commands for the current bill. State is always a valid [Bill].
 class BillEditor extends Notifier<Bill> {
   String _newId() => ref.read(idGeneratorProvider)();
+  DateTime _now() => ref.read(clockProvider)();
 
   @override
-  Bill build() =>
-      Bill(id: _newId(), currency: Currency.defaultCurrency, people: const []);
+  Bill build() => Bill(
+    id: _newId(),
+    currency: Currency.defaultCurrency,
+    people: const [],
+    createdAt: _now(),
+  );
 
   void reset() => state = build();
+
+  /// Continue editing a saved bill.
+  void open(Bill bill) => state = bill;
+
+  /// Start a new bill with the same people, items, fees and tags.
+  /// Every id is new so the copy is saved as a separate bill.
+  void duplicate(Bill bill) {
+    state = bill.copyWith(
+      id: _newId(),
+      createdAt: _now,
+      people: [
+        for (final p in bill.people)
+          p.copyWith(
+            id: _newId(),
+            items: [for (final i in p.items) i.copyWith(id: _newId())],
+          ),
+      ],
+    );
+  }
+
+  void toggleTag(String tagId) {
+    final tags = {...state.tagIds};
+    if (!tags.remove(tagId)) tags.add(tagId);
+    state = state.copyWith(tagIds: tags);
+  }
 
   void setTitle(String title) {
     final trimmed = title.trim();
@@ -57,9 +88,15 @@ class BillEditor extends Notifier<Bill> {
 
   // People ------------------------------------------------------------------
 
-  /// Adds a person and returns their id.
-  String addPerson(String name) {
-    final person = Person(id: _newId(), name: _validName(name));
+  /// Adds a person and returns their id. [phone] and [contactId] are set when
+  /// the person comes from the phone's contacts.
+  String addPerson(String name, {String? phone, String? contactId}) {
+    final person = Person(
+      id: _newId(),
+      name: _validName(name),
+      phone: phone,
+      contactId: contactId,
+    );
     state = state.copyWith(people: [...state.people, person]);
     return person.id;
   }

@@ -1,4 +1,5 @@
 import 'package:fixer/core/theme/app_theme.dart';
+import 'package:fixer/features/bill/application/auto_save.dart';
 import 'package:fixer/features/settings/application/settings_providers.dart';
 import 'package:fixer/router.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ class FixerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(autoSaveProvider); // keeps the current bill saved to history
     final accent = ref.watch(accentProvider);
     return MaterialApp.router(
       title: 'Fixer',

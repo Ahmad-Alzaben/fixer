@@ -4,6 +4,7 @@ import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/presentation/widgets/add_person_field.dart';
 import 'package:fixer/features/bill/presentation/widgets/adjustments_card.dart';
 import 'package:fixer/features/bill/presentation/widgets/person_card.dart';
+import 'package:fixer/features/bill/presentation/widgets/tag_chips.dart';
 import 'package:fixer/features/bill/presentation/widgets/total_bar.dart';
 import 'package:fixer/features/results/presentation/results_panel.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,11 @@ class _Editor extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(Gap.l, Gap.s, Gap.l, Gap.xl),
       children: [
         _TitleField(key: const ValueKey('title'), initial: bill.title),
+        const Padding(
+          key: ValueKey('tags'),
+          padding: EdgeInsets.only(top: Gap.s),
+          child: TagChips(),
+        ),
         for (final person in bill.people)
           Padding(
             key: ValueKey(person.id),

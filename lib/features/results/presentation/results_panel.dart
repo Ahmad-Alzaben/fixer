@@ -5,6 +5,7 @@ import 'package:fixer/core/widgets/section_label.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/bill/domain/bill_calculation.dart';
+import 'package:fixer/features/messaging/presentation/send_sheet.dart';
 import 'package:fixer/features/results/application/result_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,7 +49,12 @@ class ResultsPanel extends ConsumerWidget {
         const SectionLabel('Each person pays'),
         const SizedBox(height: Gap.s),
         for (final person in bill.people) ...[
-          _PersonResult(person: person, share: calc.shareOf(person.id)!),
+          _PersonResult(
+            bill: bill,
+            calc: calc,
+            person: person,
+            share: calc.shareOf(person.id)!,
+          ),
           const SizedBox(height: Gap.s),
         ],
       ],
@@ -199,8 +205,15 @@ class _ShareActions extends ConsumerWidget {
 }
 
 class _PersonResult extends StatelessWidget {
-  const _PersonResult({required this.person, required this.share});
+  const _PersonResult({
+    required this.bill,
+    required this.calc,
+    required this.person,
+    required this.share,
+  });
 
+  final Bill bill;
+  final BillCalculation calc;
   final Person person;
   final PersonShare share;
 
@@ -212,14 +225,41 @@ class _PersonResult extends StatelessWidget {
       child: ExpansionTile(
         shape: const Border(),
         collapsedShape: const Border(),
-        title: Text(
-          person.isMe ? '${person.name} (me)' : person.name,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium,
+        tilePadding: const EdgeInsets.only(left: Gap.l, right: Gap.xs),
+        // Tapping the row shows the breakdown; the amount shrinks to fit on
+        // narrow screens so the Send button always has room.
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                person.isMe ? '${person.name} (me)' : person.name,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            const SizedBox(width: Gap.s),
+            Flexible(
+              fit: FlexFit.tight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  share.total.toString(),
+                  style: theme.textTheme.amountLarge.copyWith(fontSize: 20),
+                ),
+              ),
+            ),
+          ],
         ),
-        trailing: Text(
-          share.total.toString(),
-          style: theme.textTheme.amountLarge.copyWith(fontSize: 20),
+        trailing: IconButton(
+          tooltip: 'Send to ${person.name}',
+          icon: const Icon(Icons.send_outlined),
+          onPressed: () => showSendSheet(
+            context,
+            bill: bill,
+            calculation: calc,
+            person: person,
+          ),
         ),
         childrenPadding: const EdgeInsets.fromLTRB(Gap.l, 0, Gap.l, Gap.m),
         children: [

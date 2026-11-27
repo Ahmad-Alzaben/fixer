@@ -13,7 +13,9 @@ Flutter app, Android first (iOS-ready structure). Dark, cyberpunk-inspired theme
 ## Status
 - ✅ Calculation engine: integer minor units, largest-remainder rounding, fully tested ([rounding rule](docs/ROUNDING.md))
 - ✅ Bill entry, live totals, results, copy & share, accent colors
-- ⏳ History, categories/tags, contacts, per-person WhatsApp/SMS messages, monthly reports
+- ✅ History (auto-saved, offline SQLite, sync-ready), search, multiple tags per bill
+- ✅ Add people from contacts; send each person their share via WhatsApp or SMS
+- ⏳ Monthly reports, saved message templates, settings
 
 ## Run
 ```sh

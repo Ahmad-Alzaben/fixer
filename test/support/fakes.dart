@@ -1,0 +1,72 @@
+import 'dart:async';
+
+import 'package:fixer/features/bill/application/repositories.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
+
+/// In-memory [BillRepository] for application and widget tests.
+class FakeBillRepository implements BillRepository {
+  final saved = <String, Bill>{};
+  final deleted = <String>{};
+  int saveCount = 0;
+  final _changes = StreamController<void>.broadcast();
+
+  List<Bill> get _visible =>
+      saved.values.where((b) => !deleted.contains(b.id)).toList()
+        ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+
+  @override
+  Stream<List<Bill>> watchAll() async* {
+    yield _visible;
+    await for (final _ in _changes.stream) {
+      yield _visible;
+    }
+  }
+
+  @override
+  Future<Bill?> getById(String id) async =>
+      deleted.contains(id) ? null : saved[id];
+
+  @override
+  Future<void> save(Bill bill) async {
+    saveCount++;
+    saved[bill.id] = bill;
+    deleted.remove(bill.id);
+    _changes.add(null);
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    deleted.add(id);
+    _changes.add(null);
+  }
+
+  @override
+  Future<void> restore(String id) async {
+    deleted.remove(id);
+    _changes.add(null);
+  }
+}
+
+class FakeTagRepository implements TagRepository {
+  final tags = <Tag>[
+    const Tag(id: 'tag-food', name: 'Food'),
+    const Tag(id: 'tag-electronics', name: 'Electronics'),
+  ];
+  final _changes = StreamController<void>.broadcast();
+
+  @override
+  Stream<List<Tag>> watchAll() async* {
+    yield List.of(tags);
+    await for (final _ in _changes.stream) {
+      yield List.of(tags);
+    }
+  }
+
+  @override
+  Future<Tag> create(String name) async {
+    final tag = Tag(id: 'tag-${name.toLowerCase()}', name: name.trim());
+    tags.add(tag);
+    _changes.add(null);
+    return tag;
+  }
+}
