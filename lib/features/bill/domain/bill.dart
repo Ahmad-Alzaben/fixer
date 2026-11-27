@@ -58,6 +58,15 @@ class Person {
   );
 }
 
+/// How service fee, delivery fee and discount are shared between people.
+enum SplitMode {
+  /// Everyone pays the same share (the default for new bills).
+  equal,
+
+  /// Each person pays in proportion to what they ordered.
+  proportional,
+}
+
 /// A label for grouping bills (Food, Electronics, ...). A bill can have
 /// several.
 class Tag {
@@ -76,6 +85,7 @@ class Bill {
     required List<Person> people,
     this.title,
     this.createdAt,
+    this.splitMode = SplitMode.proportional,
     Set<String> tagIds = const {},
     Money? serviceFee,
     Money? deliveryFee,
@@ -116,6 +126,10 @@ class Bill {
 
   final Set<String> tagIds;
 
+  /// How fees and discount are shared. Bills saved before this option
+  /// existed are proportional; new bills from the editor start as equal.
+  final SplitMode splitMode;
+
   /// Nullable fields ([title], [createdAt]) take a function so they can be
   /// set to null.
   Bill copyWith({
@@ -125,6 +139,7 @@ class Bill {
     String? Function()? title,
     DateTime? Function()? createdAt,
     Set<String>? tagIds,
+    SplitMode? splitMode,
     Money? serviceFee,
     Money? deliveryFee,
     Money? discount,
@@ -138,6 +153,7 @@ class Bill {
       title: title != null ? title() : this.title,
       createdAt: createdAt != null ? createdAt() : this.createdAt,
       tagIds: tagIds ?? this.tagIds,
+      splitMode: splitMode ?? this.splitMode,
       serviceFee: serviceFee ?? keep(this.serviceFee),
       deliveryFee: deliveryFee ?? keep(this.deliveryFee),
       discount: discount ?? keep(this.discount),

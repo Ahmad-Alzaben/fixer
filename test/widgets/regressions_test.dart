@@ -27,6 +27,27 @@ void main() {
   });
 
   testWidgets(
+    'bug: losing focus while the keyboard is still closing keeps screen state',
+    (tester) async {
+      await pumpApp(tester);
+      await scrollTo(tester, find.text('Fees & discount'));
+      await tester.tap(find.text('Fees & discount'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextField, 'Service fee'));
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+
+      // Keyboard still reported while focus goes away (closing animation).
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      // The expanded section must survive (no rebuild of the whole app).
+      expect(find.widgetWithText(TextField, 'Service fee'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'bug: Results keeps full height even if a stale keyboard inset arrives',
     (tester) async {
       await pumpApp(tester);

@@ -33,7 +33,11 @@ class BillEditor extends Notifier<Bill> {
     currency: ref.read(preferencesProvider).defaultCurrency,
     people: const [],
     createdAt: _now(),
+    // New bills share fees and discount equally; switchable per bill.
+    splitMode: SplitMode.equal,
   );
+
+  void setSplitMode(SplitMode mode) => state = state.copyWith(splitMode: mode);
 
   void reset() => state = build();
 

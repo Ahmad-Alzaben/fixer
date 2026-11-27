@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:drift/native.dart';
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/money/money.dart';
 import 'package:fixer/data/db/app_database.dart';
@@ -80,6 +83,35 @@ void main() {
       [('Falafel', 1450), (null, 1000)],
     );
   });
+
+  test('the split mode is saved and loaded', () async {
+    await bills.save(sampleBill().copyWith(splitMode: SplitMode.equal));
+    expect((await bills.getById('b1'))!.splitMode, SplitMode.equal);
+    await bills.save(sampleBill().copyWith(splitMode: SplitMode.proportional));
+    expect((await bills.getById('b1'))!.splitMode, SplitMode.proportional);
+  });
+
+  test(
+    'bills saved by an older version (schema 2) load as proportional',
+    () async {
+      final file = File(
+        '${Directory.systemTemp.createTempSync('fixer').path}/old.sqlite',
+      );
+      // Create a current database with one bill, then turn it back into a
+      // schema-2 database: no split_mode column, user_version 2.
+      final current = AppDatabase(NativeDatabase(file));
+      await DriftBillRepository(current, clock: () => now).save(sampleBill());
+      await current.customStatement('ALTER TABLE bills DROP COLUMN split_mode');
+      await current.customStatement('PRAGMA user_version = 2');
+      await current.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      addTearDown(upgraded.close);
+      final loaded = await DriftBillRepository(upgraded).getById('b1');
+      expect(loaded!.splitMode, SplitMode.proportional);
+      expect(loaded.people.length, 2);
+    },
+  );
 
   test('a bill without a creation date gets the save time', () async {
     await bills.save(sampleBill().copyWith(createdAt: () => null));

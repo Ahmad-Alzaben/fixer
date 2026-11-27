@@ -45,6 +45,7 @@ class DriftBillRepository implements BillRepository {
               serviceFee: bill.serviceFee.minorUnits,
               deliveryFee: bill.deliveryFee.minorUnits,
               discount: bill.discount.minorUnits,
+              splitMode: Value(bill.splitMode.name),
               createdAt: bill.createdAt ?? now,
               updatedAt: now,
               deletedAt: const Value(null),
@@ -190,6 +191,10 @@ class DriftBillRepository implements BillRepository {
       title: row.title,
       currency: currency,
       createdAt: row.createdAt,
+      splitMode: SplitMode.values.firstWhere(
+        (m) => m.name == row.splitMode,
+        orElse: () => SplitMode.proportional,
+      ),
       tagIds: {for (final t in tags) t.tagId},
       serviceFee: money(row.serviceFee),
       deliveryFee: money(row.deliveryFee),

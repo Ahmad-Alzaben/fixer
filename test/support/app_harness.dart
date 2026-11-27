@@ -105,6 +105,13 @@ Future<Harness> pumpApp(
 /// Scrolls the current screen's list until [finder] is built and on screen
 /// (list rows off screen are not built at all).
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+  // Start from the top so targets above the current view (no longer built)
+  // are found too; scrollUntilVisible only searches in one direction.
+  if (finder.evaluate().isEmpty) {
+    final scrollable = find.byType(Scrollable).first;
+    tester.state<ScrollableState>(scrollable).position.jumpTo(0);
+    await tester.pumpAndSettle();
+  }
   await tester.scrollUntilVisible(
     finder,
     150,
@@ -154,4 +161,8 @@ Future<void> enterBriefExample(WidgetTester tester) async {
   await addPrice(tester, 'id3', '1.65');
   await setAdjustment(tester, 'Service fee', '0.70');
   await setAdjustment(tester, 'Discount', '2.13');
+  // The brief's example uses the proportional split.
+  await scrollTo(tester, find.text('By order'));
+  await tester.tap(find.text('By order'));
+  await tester.pumpAndSettle();
 }

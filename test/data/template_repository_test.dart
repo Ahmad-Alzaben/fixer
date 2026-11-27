@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:fixer/data/db/app_database.dart';
 import 'package:fixer/data/repositories/drift_template_repository.dart';
@@ -102,10 +104,18 @@ void main() {
   test(
     'upgrading a version-1 database adds templates with the default',
     () async {
-      // A database created by the previous app version (schema 1).
-      final old = AppDatabase(
-        NativeDatabase.memory(setup: (raw) => raw.userVersion = 1),
+      // A realistic schema-1 database: today's schema minus what versions
+      // 2 and 3 added (templates table, bills.split_mode).
+      final file = File(
+        '${Directory.systemTemp.createTempSync('fixer').path}/v1.sqlite',
       );
+      final current = AppDatabase(NativeDatabase(file));
+      await current.customStatement('DROP TABLE message_templates');
+      await current.customStatement('ALTER TABLE bills DROP COLUMN split_mode');
+      await current.customStatement('PRAGMA user_version = 1');
+      await current.close();
+
+      final old = AppDatabase(NativeDatabase(file));
       addTearDown(old.close);
       final list = await DriftTemplateRepository(old).watchAll().first;
       expect(list.single.id, 'builtin');

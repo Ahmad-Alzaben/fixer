@@ -5,10 +5,12 @@ import 'package:fixer/features/bill/domain/bill_calculation.dart';
 
 /// Computes each person's share of a [Bill].
 ///
-/// Service and delivery fees are allocated with [allocation], weighted by
-/// each person's item subtotal. The discount is then allocated weighted by
-/// each person's subtotal + fee shares, which keeps every total >= 0.
-/// Because every column is allocated exactly, every row and column adds up.
+/// [SplitMode.equal]: service and delivery are split in equal parts; the
+/// discount too, but nobody's discount exceeds what they owe.
+/// [SplitMode.proportional]: service and delivery are weighted by each
+/// person's item subtotal; the discount by subtotal + fee shares.
+/// Either way every total is >= 0, and because every column is allocated
+/// exactly (largest remainder), every row and column adds up.
 class BillCalculator {
   const BillCalculator({this.allocation = const ProportionalAllocation()});
 
@@ -48,23 +50,30 @@ class BillCalculator {
       );
     }
 
-    if (subtotal == 0 && service + delivery > 0) {
+    final equal = bill.splitMode == SplitMode.equal;
+    if (!equal && subtotal == 0 && service + delivery > 0) {
       warnings.add(CalculationWarning.feesSplitEqually);
     }
 
-    final serviceShares = allocation.allocate(service, subtotals);
-    final deliveryShares = allocation.allocate(delivery, subtotals);
+    // Equal: every person weighs the same. Proportional: weight = subtotal.
+    final feeWeights = equal
+        ? List<int>.filled(subtotals.length, 1)
+        : subtotals;
+    final serviceShares = allocation.allocate(service, feeWeights);
+    final deliveryShares = allocation.allocate(delivery, feeWeights);
     final personGross = [
       for (var i = 0; i < subtotals.length; i++)
         subtotals[i] + serviceShares[i] + deliveryShares[i],
     ];
-    // The discount is weighted by each person's subtotal + rounded fee shares
-    // (their "gross"), not by subtotal alone. With no fees this is identical
-    // to weighting by subtotal. With fees it differs by at most a minor unit,
-    // and it guarantees discount_i <= gross_i, so nobody goes negative.
-    // (Weighting by subtotal alone let fee and discount leftovers land on
-    // different people, e.g. totals of [1, 1, -1].)
-    final discountShares = allocation.allocate(discount, personGross);
+    final discountShares = equal
+        ? _equalCapped(discount, personGross)
+        // Weighted by each person's subtotal + rounded fee shares (their
+        // "gross"), not by subtotal alone. With no fees this is identical
+        // to weighting by subtotal. With fees it differs by at most a minor
+        // unit, and it guarantees discount_i <= gross_i, so nobody goes
+        // negative. (Weighting by subtotal alone let fee and discount
+        // leftovers land on different people, e.g. totals of [1, 1, -1].)
+        : allocation.allocate(discount, personGross);
 
     final shares = [
       for (var i = 0; i < bill.people.length; i++)
@@ -88,5 +97,43 @@ class BillCalculator {
       shares: shares,
       warnings: warnings,
     );
+  }
+
+  /// Splits [amount] equally, but never gives anyone more than their cap
+  /// (what they owe). A capped person's unused part is split equally among
+  /// the others, repeating until everything is placed. Requires
+  /// `amount <= sum(caps)`, which holds because the discount is capped at
+  /// the bill total.
+  List<int> _equalCapped(int amount, List<int> caps) {
+    final result = List<int>.filled(caps.length, 0);
+    var remaining = amount;
+    var open = [
+      for (var i = 0; i < caps.length; i++)
+        if (caps[i] > 0) i,
+    ];
+    while (remaining > 0 && open.isNotEmpty) {
+      final shares = allocation.allocate(
+        remaining,
+        List<int>.filled(open.length, 1),
+      );
+      final capped = [
+        for (var k = 0; k < open.length; k++)
+          if (result[open[k]] + shares[k] >= caps[open[k]]) open[k],
+      ];
+      if (capped.isEmpty) {
+        for (var k = 0; k < open.length; k++) {
+          result[open[k]] += shares[k];
+        }
+        remaining = 0;
+      } else {
+        // Fill the capped people to their cap, then re-split the rest.
+        for (final i in capped) {
+          remaining -= caps[i] - result[i];
+          result[i] = caps[i];
+        }
+        open = open.where((i) => !capped.contains(i)).toList();
+      }
+    }
+    return result;
   }
 }

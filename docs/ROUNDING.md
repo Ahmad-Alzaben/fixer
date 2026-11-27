@@ -6,13 +6,21 @@ Implemented in `lib/core/money/allocation.dart` and `lib/features/bill/domain/bi
 - All amounts are integers in the currency's minor unit (JOD → fils, 3 decimals). No `double` anywhere.
 - Input is parsed from text; more decimals than the currency allows, negatives, and malformed input are rejected.
 
+## Split mode (per bill)
+Each bill has a switch in **Fees & discount**: **Equally** (default for new bills) or **By order** (proportional). Bills saved before v1.0.3 load as By order, which is how they were calculated.
+
 ## Steps for one bill
 1. **Subtotals**: each person's subtotal is the sum of their item prices. The bill subtotal is the sum of those.
 2. **Discount cap**: applied discount = min(discount, subtotal + service + delivery). If it was capped, warning `discountExceedsTotal`. The total is never below 0.
-3. **Service fee** is allocated weighted by subtotal.
-4. **Delivery fee** is allocated weighted by subtotal.
-5. **Discount** is allocated weighted by each person's *gross* = subtotal + their service share + their delivery share.
+3. **Service fee** and 4. **Delivery fee**:
+   - *Equally*: split into equal parts between everyone on the bill (also people with no items).
+   - *By order*: weighted by each person's subtotal.
+5. **Discount**:
+   - *Equally*: equal parts, but nobody's discount exceeds what they owe (their *gross* = subtotal + service share + delivery share). A capped person's unused part is split equally among the others, repeated until it is all placed.
+   - *By order*: weighted by each person's *gross*.
 6. **Person total** = subtotal + service share + delivery share − discount share.
+
+Example, items 4.000 / 4.123 / 4.000 with delivery 1.000: *Equally* → 0.334 / 0.333 / 0.333; *By order* → 0.330 / 0.340 / 0.330.
 
 ## Allocation method (largest remainder)
 For an amount `A` and weights `w₁…wₙ` with total `W`:

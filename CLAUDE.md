@@ -7,6 +7,7 @@ Flutter app, Android first, iOS later. Source of truth: `docs/BRIEF.md`, `docs/P
 - **Money is never `double`.** Integer minor units only. (Some examples in `dart-flutter-patterns` use `double` for prices. Don't copy that.)
 - Calculation code in `lib/core/money/` and every `domain/` folder is pure Dart: no Flutter or plugin imports.
 - Totals are derived from bill data, not stored (unless a documented cache is approved).
+- Split mode per bill: **equal** (default for new bills) or **proportional** (bills saved before v1.0.3 load as proportional). Equal discount never exceeds what a person owes.
 - Rounding: largest remainder applied **per adjustment column** (service, delivery, discount). Ties go to the person listed first. Every row and column must add up exactly in minor units. Discount is weighted by subtotal + fee shares so nobody goes negative. Full rule: `docs/ROUNDING.md`.
 - Monthly report counts only the share of the person marked "Me". Bills can have several category tags.
 - Theme: dark only, preset accent colors only, cyberpunk-*inspired* (no game logos, fonts, names or art).

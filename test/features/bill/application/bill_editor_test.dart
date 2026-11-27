@@ -2,6 +2,7 @@ import 'package:fixer/core/ids.dart';
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/money/money.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -108,6 +109,7 @@ void main() {
     final o = editor.addPerson('O');
     final j = editor.addPerson('J');
     editor
+      ..setSplitMode(SplitMode.proportional)
       ..addItem(a, jod('1.45'))
       ..addItem(a, jod('1.00'))
       ..addItem(o, jod('3.00'))

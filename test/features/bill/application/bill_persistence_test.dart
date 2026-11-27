@@ -5,6 +5,7 @@ import 'package:fixer/core/money/money.dart';
 import 'package:fixer/features/bill/application/auto_save.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/application/providers.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -39,6 +40,17 @@ void main() {
 
   test('a new bill is stamped with the current time', () {
     expect(container.read(billEditorProvider).createdAt, now);
+  });
+
+  test('a new bill splits fees equally by default, and can be changed', () {
+    expect(container.read(billEditorProvider).splitMode, SplitMode.equal);
+    editor.setSplitMode(SplitMode.proportional);
+    expect(
+      container.read(billEditorProvider).splitMode,
+      SplitMode.proportional,
+    );
+    editor.reset();
+    expect(container.read(billEditorProvider).splitMode, SplitMode.equal);
   });
 
   group('auto-save', () {

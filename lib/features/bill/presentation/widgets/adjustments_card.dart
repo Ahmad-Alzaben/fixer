@@ -3,6 +3,7 @@ import 'package:fixer/core/money/money.dart';
 import 'package:fixer/core/theme/app_theme.dart';
 import 'package:fixer/core/widgets/money_input.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/bill/domain/bill_calculation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +21,7 @@ class AdjustmentsCard extends ConsumerWidget {
         (c) => c.warnings.contains(CalculationWarning.discountExceedsTotal),
       ),
     );
+    final equal = bill.splitMode == SplitMode.equal;
     final parts = [
       if (!bill.serviceFee.isZero)
         'Service ${bill.serviceFee.toDecimalString()}',
@@ -37,11 +39,47 @@ class AdjustmentsCard extends ConsumerWidget {
         collapsedShape: const Border(),
         leading: const Icon(Icons.percent),
         title: const Text('Fees & discount'),
-        subtitle: Text(anySet ? parts.join(' · ') : 'None'),
+        subtitle: Text(
+          [
+            equal ? 'Split equally' : 'Split by order',
+            if (anySet) ...parts,
+          ].join(' · '),
+        ),
         // Top padding leaves room for the first field's floating label, which
         // sits above the field's border and was clipped with 0 here.
         childrenPadding: const EdgeInsets.fromLTRB(Gap.m, Gap.m, Gap.m, Gap.m),
         children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              'Share fees & discount',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: Gap.xs),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<SplitMode>(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(
+                  value: SplitMode.equal,
+                  icon: Icon(Icons.people_outline),
+                  label: Text('Equally'),
+                ),
+                ButtonSegment(
+                  value: SplitMode.proportional,
+                  icon: Icon(Icons.receipt_long_outlined),
+                  label: Text('By order'),
+                ),
+              ],
+              selected: {bill.splitMode},
+              onSelectionChanged: (s) => editor.setSplitMode(s.single),
+            ),
+          ),
+          const SizedBox(height: Gap.l),
           _MoneyField(
             label: 'Service fee',
             initial: bill.serviceFee,

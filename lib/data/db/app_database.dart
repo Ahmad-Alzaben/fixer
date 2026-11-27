@@ -21,6 +21,11 @@ class Bills extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
 
+  /// 'equal' or 'proportional'. Bills saved before schema 3 get the default
+  /// 'proportional', which is how they were calculated.
+  TextColumn get splitMode =>
+      text().withDefault(const Constant('proportional'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -112,8 +117,9 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.onDevice() => AppDatabase(driftDatabase(name: 'fixer'));
 
   // v1: bills, people, items, tags. v2: message templates.
+  // v3: bills.split_mode.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -139,6 +145,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(messageTemplates);
         await _seedDefaultTemplate(DateTime.now());
+      }
+      if (from < 3) {
+        await m.addColumn(bills, bills.splitMode);
       }
     },
     beforeOpen: (details) async {

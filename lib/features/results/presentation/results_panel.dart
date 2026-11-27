@@ -43,7 +43,7 @@ class ResultsPanel extends ConsumerWidget {
           _WarningBanner(_warningText(w)),
           const SizedBox(height: Gap.m),
         ],
-        _SummaryCard(calc: calc),
+        _SummaryCard(calc: calc, splitMode: bill.splitMode),
         const SizedBox(height: Gap.l),
         _ShareActions(bill: bill, calc: calc),
         const SizedBox(height: Gap.l),
@@ -97,9 +97,10 @@ class _WarningBanner extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.calc});
+  const _SummaryCard({required this.calc, required this.splitMode});
 
   final BillCalculation calc;
+  final SplitMode splitMode;
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +129,15 @@ class _SummaryCard extends StatelessWidget {
             _AmountLine('Service fee', calc.serviceFee),
             _AmountLine('Delivery fee', calc.deliveryFee),
             _AmountLine('Discount', calc.discount, negative: true),
+            const SizedBox(height: Gap.s),
+            Text(
+              splitMode == SplitMode.equal
+                  ? 'Fees and discount split equally.'
+                  : 'Fees and discount split by what each person ordered.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
