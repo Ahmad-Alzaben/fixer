@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Fixer app icon (original design). A coin with a dollar sign, split
+       diagonally into two halves, on a dark HUD card with one cut corner.
+       Cyan neon glyph with dark cut-in details. Source for all platform icons. -->
+  <defs>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10232A"/>
+      <stop offset="1" stop-color="#071114"/>
+    </linearGradient>
+    <pattern id="scan" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="2" fill="#00F0FF" opacity="0.06"/>
+    </pattern>
+    <!-- The diagonal cut runs through the coin centre (512,512). -->
+    <clipPath id="upperLeft">
+      <polygon points="0,0 1024,0 0,1024"/>
+    </clipPath>
+    <clipPath id="lowerRight">
+      <polygon points="1024,0 1024,1024 0,1024"/>
+    </clipPath>
+    <!-- One whole coin; each half is a clipped, shifted copy. -->
+    <g id="coin">
+      <circle cx="512" cy="512" r="215" fill="#00F0FF"/>
+      <circle cx="512" cy="512" r="178" fill="none" stroke="#07161A" stroke-width="12"/>
+      <!-- dollar sign, cut into the coin -->
+      <g fill="none" stroke="#07161A" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 586 436 C 562 400, 470 396, 452 446 C 432 500, 592 512, 588 580
+                 C 584 642, 474 652, 440 606" stroke-width="40" stroke-linecap="butt"/>
+        <line x1="512" y1="368" x2="512" y2="656" stroke-width="30"/>
+      </g>
+    </g>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#0A0A0F"/>
+
+  <!-- Card with the top-right corner cut -->
+  <path d="M 176 168 L 752 168 L 856 272 L 856 856 L 176 856 Z"
+        fill="url(#card)"/>
+  <path d="M 176 168 L 752 168 L 856 272 L 856 856 L 176 856 Z"
+        fill="url(#scan)"/>
+  <path d="M 176 168 L 752 168 L 856 272 L 856 856 L 176 856 Z"
+        fill="none" stroke="#00F0FF" stroke-width="14" filter="url(#glow)"/>
+  <!-- inner hairline -->
+  <path d="M 206 198 L 740 198 L 826 284 L 826 826 L 206 826 Z"
+        fill="none" stroke="#00F0FF" stroke-opacity="0.3" stroke-width="4"/>
+
+  <!-- The split coin: halves pulled apart along the cut -->
+  <g filter="url(#glow)">
+    <g clip-path="url(#upperLeft)" transform="translate(-20 -20)">
+      <use href="#coin"/>
+    </g>
+    <g clip-path="url(#lowerRight)" transform="translate(20 20)">
+      <use href="#coin"/>
+    </g>
+  </g>
+
+  <!-- small HUD sparks off the cut -->
+  <g stroke="#00F0FF" stroke-width="10" stroke-linecap="round" opacity="0.85">
+    <line x1="700" y1="300" x2="742" y2="258"/>
+    <line x1="676" y1="270" x2="690" y2="226"/>
+    <line x1="730" y1="324" x2="774" y2="310"/>
+    <line x1="292" y1="732" x2="252" y2="772"/>
+    <line x1="268" y1="712" x2="226" y2="726"/>
+    <line x1="314" y1="756" x2="300" y2="798"/>
+  </g>
+</svg>

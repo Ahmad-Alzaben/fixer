@@ -1,5 +1,7 @@
 # Fixer
 
+<img src="docs/icon/fixer-icon-1024.png" width="96" alt="Fixer icon">
+
 Split a shared bill fairly. Each person enters their items; service fee, delivery fee and discount are shared in proportion to what each person ordered, and the per-person amounts always add up exactly to the bill total.
 
 Flutter app, Android first (iOS-ready structure). Dark, cyberpunk-inspired theme with selectable accent colors. Works offline.
@@ -19,7 +21,8 @@ Flutter app, Android first (iOS-ready structure). Dark, cyberpunk-inspired theme
 - ✅ Saved message templates (one default), placeholders, live preview
 - ✅ Settings: your name (auto-marks "Me"), default currency, country code
 - ✅ Phase 4 review: accessibility, large text, limits, iOS project ([report](docs/PHASE4_REVIEW.md))
-- ⏳ App icon; iOS build needs a Mac
+- ✅ App icon (source: `docs/icon/fixer-icon.svg`, regenerate with `docs/icon/make_icons.ps1`)
+- ⏳ iOS build needs a Mac
 
 ## Run
 ```sh
