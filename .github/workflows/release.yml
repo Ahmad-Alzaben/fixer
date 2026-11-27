@@ -16,6 +16,13 @@ name: Build and release
 on:
   push:
     branches: [main]
+    # Documentation-only pushes don't produce a new release. A push that
+    # also touches app code, tests, platform files or this workflow still
+    # runs. Use "Run workflow" (workflow_dispatch) to force a build.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.claude/**'
   workflow_dispatch: {}
 
 # One release run at a time; a newer push cancels an older one in progress.
