@@ -91,6 +91,35 @@ void main() {
     expect((await bills.getById('b1'))!.splitMode, SplitMode.proportional);
   });
 
+  test('the tax mode and rate are saved and loaded', () async {
+    await bills.save(
+      sampleBill().copyWith(taxMode: TaxMode.added, taxRate: 1600),
+    );
+    final loaded = (await bills.getById('b1'))!;
+    expect(loaded.taxMode, TaxMode.added);
+    expect(loaded.taxRate, 1600);
+  });
+
+  test('bills saved by an older version (schema 3) load with no tax', () async {
+    final file = File(
+      '${Directory.systemTemp.createTempSync('fixer').path}/old.sqlite',
+    );
+    // A realistic schema-3 database: no tax columns, user_version 3.
+    final current = AppDatabase(NativeDatabase(file));
+    await DriftBillRepository(current, clock: () => now).save(sampleBill());
+    await current.customStatement('ALTER TABLE bills DROP COLUMN tax_mode');
+    await current.customStatement('ALTER TABLE bills DROP COLUMN tax_rate');
+    await current.customStatement('PRAGMA user_version = 3');
+    await current.close();
+
+    final upgraded = AppDatabase(NativeDatabase(file));
+    addTearDown(upgraded.close);
+    final loaded = await DriftBillRepository(upgraded).getById('b1');
+    expect(loaded!.taxMode, TaxMode.none);
+    expect(loaded.taxRate, 0);
+    expect(loaded.people.length, 2);
+  });
+
   test(
     'bills saved by an older version (schema 2) load as proportional',
     () async {
@@ -102,6 +131,8 @@ void main() {
       final current = AppDatabase(NativeDatabase(file));
       await DriftBillRepository(current, clock: () => now).save(sampleBill());
       await current.customStatement('ALTER TABLE bills DROP COLUMN split_mode');
+      await current.customStatement('ALTER TABLE bills DROP COLUMN tax_mode');
+      await current.customStatement('ALTER TABLE bills DROP COLUMN tax_rate');
       await current.customStatement('PRAGMA user_version = 2');
       await current.close();
 

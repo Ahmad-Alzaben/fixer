@@ -6,6 +6,7 @@ import 'package:fixer/core/widgets/section_label.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/bill/domain/bill_calculation.dart';
+import 'package:fixer/features/bill/domain/tax.dart';
 import 'package:fixer/features/messaging/presentation/send_sheet.dart';
 import 'package:fixer/features/results/application/result_text.dart';
 import 'package:flutter/material.dart';
@@ -129,6 +130,7 @@ class _SummaryCard extends StatelessWidget {
             _AmountLine('Service fee', calc.serviceFee),
             _AmountLine('Delivery fee', calc.deliveryFee),
             _AmountLine('Discount', calc.discount, negative: true),
+            ..._taxLines(calc, calc.tax),
             const SizedBox(height: Gap.s),
             Text(
               splitMode == SplitMode.equal
@@ -143,6 +145,17 @@ class _SummaryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Tax 16%" when added on top; "Includes tax 16%" (not added again) when
+/// prices already contain it; nothing for bills without tax.
+List<Widget> _taxLines(BillCalculation calc, Money tax) {
+  final rate = '${formatTaxPercent(calc.taxRate)}%';
+  return switch (calc.taxMode) {
+    TaxMode.none => const [],
+    TaxMode.added => [_AmountLine('Tax $rate', tax)],
+    TaxMode.included => [_AmountLine('Includes tax $rate', tax)],
+  };
 }
 
 class _AmountLine extends StatelessWidget {
@@ -291,6 +304,7 @@ class _PersonResult extends StatelessWidget {
           _AmountLine('Service fee', share.serviceFee),
           _AmountLine('Delivery fee', share.deliveryFee),
           _AmountLine('Discount', share.discount, negative: true),
+          ..._taxLines(calc, share.tax),
         ],
       ),
     );

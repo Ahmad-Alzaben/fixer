@@ -22,14 +22,14 @@ Flutter app, Android first, iOS later. Source of truth: `docs/BRIEF.md`, `docs/P
 - `dart-flutter-patterns`, `flutter-dart-code-review`: Flutter idioms and review checklist, subject to the rules above.
 
 ## Current state (handoff)
-- **Released:** v1.0.3 (all phases of the brief done, plus icon, CI/CD, release signing). Repo: `github.com/Ahmad-Alzaben/fixer` (public). Owner tests on a OnePlus Nord CE 3 Lite (arm64) and a Samsung.
-- **Owner decisions so far:** JOD 3 decimals; new bills split fees/discount **equally**, per-bill switch to **by order**; several tags per bill; reports = owner's "Me" share only; several message templates, exactly one default; dark only, preset accents.
+- **Released:** v1.0.4 (tax; all phases of the brief done, plus icon, CI/CD, release signing). Repo: `github.com/Ahmad-Alzaben/fixer` (public). Owner tests on a OnePlus Nord CE 3 Lite (arm64) and a Samsung.
+- **Owner decisions so far:** JOD 3 decimals; new bills split fees/discount **equally**, per-bill switch to **by order**; several tags per bill; reports = owner's "Me" share only; several message templates, exactly one default; dark only, preset accents; tax per bill (none / included / added), rate + default mode in Settings (default 16%, no tax), added tax is on items + service after the discount.
 - **Open items / known limitations:** `docs/PHASE4_REVIEW.md` (tag rename/delete, Arabic/RTL, TalkBack pass, bundled font, iOS needs a Mac + Apple account for signed builds).
 
 ## How to work on this repo
 - **Verify:** `flutter analyze` and `flutter test` (189+ tests). Database tests use Windows' built-in `winsqlite3.dll` via `test/support/test_database.dart`; CI installs `libsqlite3-dev`.
 - **Bugs:** reproduce first with a failing test in `test/widgets/regressions_test.dart` (or a unit test), then fix. Widget tests use `test/support/app_harness.dart` (`pumpApp`, fakes for storage, contacts, sharing, launcher). IDs in tests are `id0` (bill), `id1`… in creation order.
-- **Database (Drift 2.28, pinned by Flutter 3.35's analyzer):** after changing tables run `dart run build_runner build --delete-conflicting-outputs`, bump `schemaVersion` (now 3), add an `onUpgrade` step, and add an upgrade test that starts from a realistic old database (see `test/data/*`). Rows are sync-ready: UUID ids, `updatedAt`, soft delete via `deletedAt`.
+- **Database (Drift 2.28, pinned by Flutter 3.35's analyzer):** after changing tables run `dart run build_runner build --delete-conflicting-outputs`, bump `schemaVersion` (now 4), add an `onUpgrade` step, and add an upgrade test that starts from a realistic old database (see `test/data/*`). Rows are sync-ready: UUID ids, `updatedAt`, soft delete via `deletedAt`.
 - **Commits:** only when the owner asks ("commit and push"). Never stage `android/key.properties`, `*.jks`, `*.apk`, `*.ipa`, `release/`.
 
 ## Releasing

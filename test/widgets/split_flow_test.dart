@@ -129,6 +129,7 @@ void main() {
     await pumpApp(tester);
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
+    await scrollTo(tester, find.text('Electric Cyan'));
     await tester.tap(find.text('Electric Cyan'));
     await tester.pumpAndSettle();
     final theme = Theme.of(tester.element(find.text('SETTINGS')));

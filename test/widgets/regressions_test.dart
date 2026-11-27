@@ -30,8 +30,8 @@ void main() {
     'bug: losing focus while the keyboard is still closing keeps screen state',
     (tester) async {
       await pumpApp(tester);
-      await scrollTo(tester, find.text('Fees & discount'));
-      await tester.tap(find.text('Fees & discount'));
+      await scrollTo(tester, find.text('Fees, discount & tax'));
+      await tester.tap(find.text('Fees, discount & tax'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(TextField, 'Service fee'));
       tester.view.viewInsets = const FakeViewPadding(bottom: 300);
@@ -95,8 +95,8 @@ void main() {
     'bug: the floating "Service fee" label is not cut off by the section',
     (tester) async {
       await pumpApp(tester);
-      await scrollTo(tester, find.text('Fees & discount'));
-      await tester.tap(find.text('Fees & discount'));
+      await scrollTo(tester, find.text('Fees, discount & tax'));
+      await tester.tap(find.text('Fees, discount & tax'));
       await tester.pumpAndSettle();
       final field = find.widgetWithText(TextField, 'Service fee');
       await tester.tap(field); // focus: the label floats above the border
@@ -107,7 +107,7 @@ void main() {
       );
       final header = tester.getRect(
         find.ancestor(
-          of: find.text('Fees & discount'),
+          of: find.text('Fees, discount & tax'),
           matching: find.byType(ListTile),
         ),
       );

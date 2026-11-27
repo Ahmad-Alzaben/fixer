@@ -2,6 +2,8 @@ import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/theme/app_accent.dart';
 import 'package:fixer/core/theme/app_theme.dart';
 import 'package:fixer/core/widgets/section_label.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
+import 'package:fixer/features/bill/domain/tax.dart';
 import 'package:fixer/features/settings/application/settings_providers.dart';
 import 'package:fixer/router.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +29,12 @@ class SettingsScreen extends ConsumerWidget {
           const _DefaultCurrencyField(),
           const SizedBox(height: Gap.m),
           const _CountryCodeField(),
+          const SizedBox(height: Gap.xl),
+          const SectionLabel('Tax'),
+          const SizedBox(height: Gap.s),
+          const _TaxRateField(),
+          const SizedBox(height: Gap.m),
+          const _DefaultTaxModeField(),
           const SizedBox(height: Gap.xl),
           const SectionLabel('Messages'),
           const SizedBox(height: Gap.s),
@@ -156,6 +164,94 @@ class _CountryCodeFieldState extends ConsumerState<_CountryCodeField> {
         helperText: 'Turns local numbers like 079… into +962 79… for WhatsApp.',
         helperMaxLines: 2,
       ),
+    );
+  }
+}
+
+class _TaxRateField extends ConsumerStatefulWidget {
+  const _TaxRateField();
+
+  @override
+  ConsumerState<_TaxRateField> createState() => _TaxRateFieldState();
+}
+
+class _TaxRateFieldState extends ConsumerState<_TaxRateField> {
+  late final _controller = TextEditingController(
+    text: formatTaxPercent(ref.read(preferencesProvider).taxRate),
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _changed(String value) async {
+    try {
+      final rate = parseTaxPercent(value);
+      await ref.read(preferencesProvider.notifier).setTaxRate(rate);
+      if (mounted && _error != null) setState(() => _error = null);
+    } on FormatException {
+      if (mounted) setState(() => _error = 'A percentage from 0 to 100');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      key: const ValueKey('tax-rate'),
+      controller: _controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      onChanged: _changed,
+      decoration: InputDecoration(
+        labelText: 'Tax rate',
+        suffixText: '%',
+        prefixIcon: const Icon(Icons.receipt_outlined),
+        errorText: _error,
+        helperText: 'Used by new bills. Bills you already made keep theirs.',
+        helperMaxLines: 2,
+      ),
+    );
+  }
+}
+
+class _DefaultTaxModeField extends ConsumerWidget {
+  const _DefaultTaxModeField();
+
+  static const _labels = {
+    TaxMode.none: 'No tax',
+    TaxMode.included: 'Included in prices',
+    TaxMode.added: 'Added on top',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(
+      preferencesProvider.select((p) => p.defaultTaxMode),
+    );
+    return DropdownButtonFormField<TaxMode>(
+      key: const ValueKey('default-tax-mode'),
+      initialValue: current,
+      // Expanded so long labels shrink with ellipsis on narrow screens or
+      // large text instead of overflowing.
+      isExpanded: true,
+      decoration: const InputDecoration(
+        labelText: 'New bills start with',
+        prefixIcon: Icon(Icons.tune),
+      ),
+      items: [
+        for (final mode in TaxMode.values)
+          DropdownMenuItem(
+            value: mode,
+            child: Text(_labels[mode]!, overflow: TextOverflow.ellipsis),
+          ),
+      ],
+      onChanged: (mode) {
+        if (mode != null) {
+          ref.read(preferencesProvider.notifier).setDefaultTaxMode(mode);
+        }
+      },
     );
   }
 }

@@ -17,11 +17,11 @@ Map<String, String> messageValues({
     'billTotal': calculation.total.toString(),
     'title': bill.title ?? 'the bill',
     'date': DateFormat('d MMM yyyy', 'en_US').format(date),
-    'items': share == null ? '' : _receipt(person, share),
+    'items': share == null ? '' : _receipt(person, share, calculation),
   };
 }
 
-String _receipt(Person person, PersonShare share) {
+String _receipt(Person person, PersonShare share, BillCalculation calc) {
   String amount(Money m) => m.toDecimalString();
   return [
     for (final (i, item) in person.items.indexed)
@@ -29,5 +29,9 @@ String _receipt(Person person, PersonShare share) {
     if (!share.serviceFee.isZero) 'Service: ${amount(share.serviceFee)}',
     if (!share.deliveryFee.isZero) 'Delivery: ${amount(share.deliveryFee)}',
     if (!share.discount.isZero) 'Discount: -${amount(share.discount)}',
+    if (calc.taxMode == TaxMode.added && !share.tax.isZero)
+      'Tax: ${amount(share.tax)}',
+    if (calc.taxMode == TaxMode.included && !share.tax.isZero)
+      'Includes tax: ${amount(share.tax)}',
   ].join('\n');
 }

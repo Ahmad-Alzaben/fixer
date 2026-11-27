@@ -1,5 +1,6 @@
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/money/money.dart';
+import 'package:fixer/features/bill/domain/tax.dart';
 
 /// One priced line on a person's order. Description is optional.
 class BillItem {
@@ -67,6 +68,19 @@ enum SplitMode {
   proportional,
 }
 
+/// Whether the bill's prices include tax, or tax is added on top.
+enum TaxMode {
+  /// No tax (bills saved before tax existed load as this).
+  none,
+
+  /// Item prices already include tax; totals don't change, the tax part is
+  /// only shown.
+  included,
+
+  /// Tax is added on top of items + service fee, after the discount.
+  added,
+}
+
 /// A label for grouping bills (Food, Electronics, ...). A bill can have
 /// several.
 class Tag {
@@ -86,6 +100,8 @@ class Bill {
     this.title,
     this.createdAt,
     this.splitMode = SplitMode.proportional,
+    this.taxMode = TaxMode.none,
+    this.taxRate = 0,
     Set<String> tagIds = const {},
     Money? serviceFee,
     Money? deliveryFee,
@@ -98,6 +114,9 @@ class Bill {
     _checkAdjustment(this.serviceFee, 'serviceFee');
     _checkAdjustment(this.deliveryFee, 'deliveryFee');
     _checkAdjustment(this.discount, 'discount');
+    if (taxRate < 0 || taxRate > maxTaxRate) {
+      throw ArgumentError.value(taxRate, 'taxRate', 'must be 0 to 10000');
+    }
     for (final person in this.people) {
       for (final item in person.items) {
         if (item.price.currency.code != currency.code) {
@@ -130,6 +149,12 @@ class Bill {
   /// existed are proportional; new bills from the editor start as equal.
   final SplitMode splitMode;
 
+  final TaxMode taxMode;
+
+  /// Tax rate in basis points (1600 = 16%), copied from settings when the
+  /// bill is created so later changes to the setting don't alter it.
+  final int taxRate;
+
   /// Nullable fields ([title], [createdAt]) take a function so they can be
   /// set to null.
   Bill copyWith({
@@ -140,6 +165,8 @@ class Bill {
     DateTime? Function()? createdAt,
     Set<String>? tagIds,
     SplitMode? splitMode,
+    TaxMode? taxMode,
+    int? taxRate,
     Money? serviceFee,
     Money? deliveryFee,
     Money? discount,
@@ -154,6 +181,8 @@ class Bill {
       createdAt: createdAt != null ? createdAt() : this.createdAt,
       tagIds: tagIds ?? this.tagIds,
       splitMode: splitMode ?? this.splitMode,
+      taxMode: taxMode ?? this.taxMode,
+      taxRate: taxRate ?? this.taxRate,
       serviceFee: serviceFee ?? keep(this.serviceFee),
       deliveryFee: deliveryFee ?? keep(this.deliveryFee),
       discount: discount ?? keep(this.discount),

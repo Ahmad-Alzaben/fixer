@@ -19,7 +19,8 @@ Flutter app, Android first (iOS-ready structure). Dark, cyberpunk-inspired theme
 - ✅ Add people from contacts; send each person their share via WhatsApp or SMS
 - ✅ Monthly report of your own share, by tag, with recent months
 - ✅ Saved message templates (one default), placeholders, live preview
-- ✅ Settings: your name (auto-marks "Me"), default currency, country code
+- ✅ Settings: your name (auto-marks "Me"), default currency, country code, tax rate
+- ✅ Tax per bill: none, included in prices, or added on top (items + service, after discount)
 - ✅ Phase 4 review: accessibility, large text, limits, iOS project ([report](docs/PHASE4_REVIEW.md))
 - ✅ App icon (source: `docs/icon/fixer-icon.svg`, regenerate with `docs/icon/make_icons.ps1`)
 - ⏳ iOS build needs a Mac

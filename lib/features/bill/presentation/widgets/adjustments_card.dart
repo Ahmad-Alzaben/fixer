@@ -5,10 +5,11 @@ import 'package:fixer/core/widgets/money_input.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/bill/domain/bill_calculation.dart';
+import 'package:fixer/features/bill/domain/tax.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Service fee, delivery fee and discount, collapsed until needed.
+/// Service fee, delivery fee, discount and tax, collapsed until needed.
 class AdjustmentsCard extends ConsumerWidget {
   const AdjustmentsCard({super.key});
 
@@ -28,6 +29,10 @@ class AdjustmentsCard extends ConsumerWidget {
       if (!bill.deliveryFee.isZero)
         'Delivery ${bill.deliveryFee.toDecimalString()}',
       if (!bill.discount.isZero) 'Discount ${bill.discount.toDecimalString()}',
+      if (bill.taxMode == TaxMode.added)
+        'Tax ${formatTaxPercent(bill.taxRate)}% added',
+      if (bill.taxMode == TaxMode.included)
+        'Tax ${formatTaxPercent(bill.taxRate)}% included',
     ];
     final anySet = parts.isNotEmpty;
 
@@ -38,7 +43,7 @@ class AdjustmentsCard extends ConsumerWidget {
         shape: const Border(),
         collapsedShape: const Border(),
         leading: const Icon(Icons.percent),
-        title: const Text('Fees & discount'),
+        title: const Text('Fees, discount & tax'),
         subtitle: Text(
           [
             equal ? 'Split equally' : 'Split by order',
@@ -102,6 +107,41 @@ class AdjustmentsCard extends ConsumerWidget {
             warning: discountTooBig
                 ? 'Discount is larger than the bill. The total is capped at 0.'
                 : null,
+          ),
+          const SizedBox(height: Gap.l),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              'Tax ${formatTaxPercent(bill.taxRate)}%',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: Gap.xs),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<TaxMode>(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(value: TaxMode.none, label: Text('No tax')),
+                ButtonSegment(value: TaxMode.included, label: Text('Included')),
+                ButtonSegment(value: TaxMode.added, label: Text('Added')),
+              ],
+              selected: {bill.taxMode},
+              onSelectionChanged: (s) => editor.setTaxMode(s.single),
+            ),
+          ),
+          const SizedBox(height: Gap.xs),
+          Text(
+            switch (bill.taxMode) {
+              TaxMode.none => 'Rate is set in Settings.',
+              TaxMode.included => 'Prices already include tax.',
+              TaxMode.added => 'Added on items + service, after the discount.',
+            },
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

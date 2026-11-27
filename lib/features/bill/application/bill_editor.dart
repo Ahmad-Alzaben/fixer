@@ -28,18 +28,45 @@ class BillEditor extends Notifier<Bill> {
   DateTime _now() => ref.read(clockProvider)();
 
   @override
-  Bill build() => Bill(
-    id: _newId(),
-    currency: ref.read(preferencesProvider).defaultCurrency,
-    people: const [],
-    createdAt: _now(),
-    // New bills share fees and discount equally; switchable per bill.
-    splitMode: SplitMode.equal,
-  );
+  Bill build() {
+    // A tax setting changed before anything was priced (e.g. right after
+    // opening the app) applies to the bill being started.
+    ref.listen(preferencesProvider, (_, prefs) {
+      if (!state.hasNoAmounts) return;
+      state = state.copyWith(
+        taxRate: prefs.taxRate,
+        taxMode: prefs.defaultTaxMode,
+      );
+    });
+    return _newBill();
+  }
+
+  Bill _newBill() {
+    final prefs = ref.read(preferencesProvider);
+    return Bill(
+      id: _newId(),
+      currency: prefs.defaultCurrency,
+      people: const [],
+      createdAt: _now(),
+      // New bills share fees and discount equally; switchable per bill.
+      splitMode: SplitMode.equal,
+      taxMode: prefs.defaultTaxMode,
+      taxRate: prefs.taxRate,
+    );
+  }
 
   void setSplitMode(SplitMode mode) => state = state.copyWith(splitMode: mode);
 
-  void reset() => state = build();
+  /// A bill without a rate (e.g. saved before tax existed) takes the rate
+  /// from Settings when tax is switched on.
+  void setTaxMode(TaxMode mode) => state = state.copyWith(
+    taxMode: mode,
+    taxRate: state.taxRate == 0 && mode != TaxMode.none
+        ? ref.read(preferencesProvider).taxRate
+        : null,
+  );
+
+  void reset() => state = _newBill();
 
   /// Continue editing a saved bill.
   void open(Bill bill) => state = bill;

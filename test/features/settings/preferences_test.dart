@@ -2,6 +2,7 @@ import 'package:fixer/core/ids.dart';
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/money/money.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/settings/application/settings_providers.dart';
 import 'package:fixer/features/settings/data/prefs_settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,6 +58,77 @@ void main() {
     await prefs.setYourName('  ');
     expect(c.read(preferencesProvider).yourName, isNull);
     expect(() => prefs.setCountryCode('abc'), throwsArgumentError);
+  });
+
+  group('tax', () {
+    test('defaults: 16%, new bills have no tax', () async {
+      final p = (await containerWith({})).read(preferencesProvider);
+      expect(p.taxRate, 1600);
+      expect(p.defaultTaxMode, TaxMode.none);
+    });
+
+    test('rate and default mode are saved and restored', () async {
+      final c = await containerWith({});
+      await c.read(preferencesProvider.notifier).setTaxRate(750);
+      await c
+          .read(preferencesProvider.notifier)
+          .setDefaultTaxMode(TaxMode.added);
+      final restarted = ProviderContainer(
+        overrides: [
+          settingsRepositoryProvider.overrideWithValue(
+            PrefsSettingsRepository(await SharedPreferences.getInstance()),
+          ),
+        ],
+      );
+      final p = restarted.read(preferencesProvider);
+      expect(p.taxRate, 750);
+      expect(p.defaultTaxMode, TaxMode.added);
+    });
+
+    test('new bills copy the rate and default mode', () async {
+      final c = await containerWith({
+        'taxRate': 1000,
+        'defaultTaxMode': 'included',
+      });
+      final bill = c.read(billEditorProvider);
+      expect(bill.taxRate, 1000);
+      expect(bill.taxMode, TaxMode.included);
+    });
+
+    test('changing the setting updates a bill with no amounts yet', () async {
+      final c = await containerWith({});
+      final editor = c.read(billEditorProvider.notifier);
+      editor.addPerson('A');
+      await c.read(preferencesProvider.notifier).setTaxRate(1000);
+      await c
+          .read(preferencesProvider.notifier)
+          .setDefaultTaxMode(TaxMode.added);
+      final bill = c.read(billEditorProvider);
+      expect(bill.taxRate, 1000);
+      expect(bill.taxMode, TaxMode.added);
+    });
+
+    test('changing the setting leaves a bill with amounts alone', () async {
+      final c = await containerWith({});
+      final editor = c.read(billEditorProvider.notifier);
+      editor.addItem(editor.addPerson('A'), Money.parse('5', Currency.jod));
+      await c.read(preferencesProvider.notifier).setTaxRate(1000);
+      expect(c.read(billEditorProvider).taxRate, 1600);
+    });
+
+    test('each bill can switch its tax mode', () async {
+      final c = await containerWith({});
+      c.read(billEditorProvider.notifier).setTaxMode(TaxMode.added);
+      expect(c.read(billEditorProvider).taxMode, TaxMode.added);
+    });
+
+    test('an old bill without a rate takes the Settings rate', () async {
+      final c = await containerWith({'taxRate': 1000});
+      final editor = c.read(billEditorProvider.notifier);
+      editor.open(c.read(billEditorProvider).copyWith(taxRate: 0));
+      editor.setTaxMode(TaxMode.added);
+      expect(c.read(billEditorProvider).taxRate, 1000);
+    });
   });
 
   group('bill editor uses preferences', () {

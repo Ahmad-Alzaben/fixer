@@ -1,5 +1,6 @@
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/theme/app_accent.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 
 /// App-wide preferences. Implementations decide where they are stored.
 abstract interface class SettingsRepository {
@@ -18,9 +19,20 @@ abstract interface class SettingsRepository {
   /// into international ones for WhatsApp.
   String get countryCode;
   Future<void> setCountryCode(String digits);
+
+  /// Tax rate for new bills in basis points (1600 = 16%).
+  int get taxRate;
+  Future<void> setTaxRate(int rate);
+
+  /// Tax mode new bills start with.
+  TaxMode get defaultTaxMode;
+  Future<void> setDefaultTaxMode(TaxMode mode);
 }
 
 const defaultCountryCode = '962';
+
+/// Jordan's general sales tax.
+const defaultTaxRate = 1600;
 
 /// Non-persistent settings; the default until `main()` installs the real one,
 /// and handy in tests.
@@ -33,6 +45,10 @@ class InMemorySettingsRepository implements SettingsRepository {
   Currency defaultCurrency = Currency.defaultCurrency;
   @override
   String countryCode = defaultCountryCode;
+  @override
+  int taxRate = defaultTaxRate;
+  @override
+  TaxMode defaultTaxMode = TaxMode.none;
 
   @override
   Future<void> setAccent(AppAccent value) async => accent = value;
@@ -43,4 +59,9 @@ class InMemorySettingsRepository implements SettingsRepository {
       defaultCurrency = value;
   @override
   Future<void> setCountryCode(String value) async => countryCode = value;
+  @override
+  Future<void> setTaxRate(int value) async => taxRate = value;
+  @override
+  Future<void> setDefaultTaxMode(TaxMode value) async =>
+      defaultTaxMode = value;
 }

@@ -1,4 +1,5 @@
 import 'package:fixer/core/money/money.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 
 enum CalculationWarning {
   /// The bill has no people, so nothing could be allocated.
@@ -13,7 +14,8 @@ enum CalculationWarning {
 }
 
 /// One person's row in the results. Always satisfies
-/// `subtotal + serviceFee + deliveryFee - discount == total`.
+/// `subtotal + serviceFee + deliveryFee - discount (+ tax when added) == total`.
+/// With tax included in prices, [tax] is the part of the total that is tax.
 class PersonShare {
   const PersonShare({
     required this.personId,
@@ -21,6 +23,7 @@ class PersonShare {
     required this.serviceFee,
     required this.deliveryFee,
     required this.discount,
+    required this.tax,
     required this.total,
   });
 
@@ -29,6 +32,7 @@ class PersonShare {
   final Money serviceFee;
   final Money deliveryFee;
   final Money discount;
+  final Money tax;
   final Money total;
 }
 
@@ -41,6 +45,9 @@ class BillCalculation {
     required this.deliveryFee,
     required this.requestedDiscount,
     required this.discount,
+    required this.taxMode,
+    required this.taxRate,
+    required this.tax,
     required this.total,
     required List<PersonShare> shares,
     required Set<CalculationWarning> warnings,
@@ -56,6 +63,15 @@ class BillCalculation {
 
   /// The discount actually applied (capped at subtotal + fees).
   final Money discount;
+
+  final TaxMode taxMode;
+
+  /// Basis points (1600 = 16%).
+  final int taxRate;
+
+  /// Tax added on top, or the tax part of the total when included in prices.
+  /// Zero for [TaxMode.none].
+  final Money tax;
 
   final Money total;
   final List<PersonShare> shares;

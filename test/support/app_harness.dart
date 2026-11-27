@@ -140,7 +140,7 @@ Future<void> addPrice(WidgetTester tester, String person, String price) async {
 Future<void> setAdjustment(WidgetTester tester, String label, String v) async {
   final field = find.widgetWithText(TextField, label);
   if (field.evaluate().isEmpty) {
-    final expand = find.text('Fees & discount');
+    final expand = find.text('Fees, discount & tax');
     await scrollTo(tester, expand);
     await tester.tap(expand);
     await tester.pumpAndSettle();

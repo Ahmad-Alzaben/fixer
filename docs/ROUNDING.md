@@ -18,7 +18,13 @@ Each bill has a switch in **Fees & discount**: **Equally** (default for new bill
 5. **Discount**:
    - *Equally*: equal parts, but nobody's discount exceeds what they owe (their *gross* = subtotal + service share + delivery share). A capped person's unused part is split equally among the others, repeated until it is all placed.
    - *By order*: weighted by each person's *gross*.
-6. **Person total** = subtotal + service share + delivery share − discount share.
+6. **Tax** (per bill: *No tax*, *Included*, *Added*; rate in basis points, 1600 = 16%, copied from Settings when the bill is created):
+   - *Taxed amount* per person = max(0, subtotal + service share − discount share). Delivery is not taxed; the discount comes off the taxed part first. Bill taxed amount = max(0, subtotal + service − applied discount).
+   - *Added*: bill tax = taxed amount × rate. *Included*: bill tax = taxed amount × rate / (100% + rate), shown only, not added.
+   - The bill tax is rounded **half up** to a whole minor unit once, then allocated by each person's taxed amount (largest remainder, whatever the split mode).
+7. **Person total** = subtotal + service share + delivery share − discount share (+ tax share when *Added*).
+
+Tax example (16% added, equally): A 10.000, B 5.000, service 1.500, delivery 1.000 → taxed 10.750 / 5.750 → tax 2.640 split 1.720 / 0.920 → totals 12.970 / 7.170.
 
 Example, items 4.000 / 4.123 / 4.000 with delivery 1.000: *Equally* → 0.334 / 0.333 / 0.333; *By order* → 0.330 / 0.340 / 0.330.
 
@@ -31,8 +37,8 @@ For an amount `A` and weights `w₁…wₙ` with total `W`:
 5. If every weight is 0 (nobody has priced items), split equally, same tie rule, warning `feesSplitEqually`.
 
 ## Guarantees (tested)
-- Every column (service, delivery, discount, total) sums **exactly** to the bill value.
-- Every row satisfies subtotal + service + delivery − discount = total.
+- Every column (service, delivery, discount, tax, total) sums **exactly** to the bill value.
+- Every row satisfies subtotal + service + delivery − discount (+ tax when added) = total.
 - No person total is ever negative.
 
 ## Brief example (JOD, 3 decimals)

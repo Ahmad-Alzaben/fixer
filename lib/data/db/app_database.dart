@@ -26,6 +26,12 @@ class Bills extends Table {
   TextColumn get splitMode =>
       text().withDefault(const Constant('proportional'))();
 
+  /// 'none', 'included' or 'added'. Bills from before schema 4 have no tax.
+  TextColumn get taxMode => text().withDefault(const Constant('none'))();
+
+  /// Basis points (1600 = 16%).
+  IntColumn get taxRate => integer().withDefault(const Constant(0))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -117,9 +123,9 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.onDevice() => AppDatabase(driftDatabase(name: 'fixer'));
 
   // v1: bills, people, items, tags. v2: message templates.
-  // v3: bills.split_mode.
+  // v3: bills.split_mode. v4: bills.tax_mode, bills.tax_rate.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -148,6 +154,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await m.addColumn(bills, bills.splitMode);
+      }
+      if (from < 4) {
+        await m.addColumn(bills, bills.taxMode);
+        await m.addColumn(bills, bills.taxRate);
       }
     },
     beforeOpen: (details) async {

@@ -115,6 +115,30 @@ class $BillsTable extends Bills with TableInfo<$BillsTable, BillRow> {
     requiredDuringInsert: false,
     defaultValue: const Constant('proportional'),
   );
+  static const VerificationMeta _taxModeMeta = const VerificationMeta(
+    'taxMode',
+  );
+  @override
+  late final GeneratedColumn<String> taxMode = GeneratedColumn<String>(
+    'tax_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('none'),
+  );
+  static const VerificationMeta _taxRateMeta = const VerificationMeta(
+    'taxRate',
+  );
+  @override
+  late final GeneratedColumn<int> taxRate = GeneratedColumn<int>(
+    'tax_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -127,6 +151,8 @@ class $BillsTable extends Bills with TableInfo<$BillsTable, BillRow> {
     updatedAt,
     deletedAt,
     splitMode,
+    taxMode,
+    taxRate,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -214,6 +240,18 @@ class $BillsTable extends Bills with TableInfo<$BillsTable, BillRow> {
         splitMode.isAcceptableOrUnknown(data['split_mode']!, _splitModeMeta),
       );
     }
+    if (data.containsKey('tax_mode')) {
+      context.handle(
+        _taxModeMeta,
+        taxMode.isAcceptableOrUnknown(data['tax_mode']!, _taxModeMeta),
+      );
+    }
+    if (data.containsKey('tax_rate')) {
+      context.handle(
+        _taxRateMeta,
+        taxRate.isAcceptableOrUnknown(data['tax_rate']!, _taxRateMeta),
+      );
+    }
     return context;
   }
 
@@ -263,6 +301,14 @@ class $BillsTable extends Bills with TableInfo<$BillsTable, BillRow> {
         DriftSqlType.string,
         data['${effectivePrefix}split_mode'],
       )!,
+      taxMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tax_mode'],
+      )!,
+      taxRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tax_rate'],
+      )!,
     );
   }
 
@@ -286,6 +332,12 @@ class BillRow extends DataClass implements Insertable<BillRow> {
   /// 'equal' or 'proportional'. Bills saved before schema 3 get the default
   /// 'proportional', which is how they were calculated.
   final String splitMode;
+
+  /// 'none', 'included' or 'added'. Bills from before schema 4 have no tax.
+  final String taxMode;
+
+  /// Basis points (1600 = 16%).
+  final int taxRate;
   const BillRow({
     required this.id,
     this.title,
@@ -297,6 +349,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
     required this.updatedAt,
     this.deletedAt,
     required this.splitMode,
+    required this.taxMode,
+    required this.taxRate,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -315,6 +369,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['split_mode'] = Variable<String>(splitMode);
+    map['tax_mode'] = Variable<String>(taxMode);
+    map['tax_rate'] = Variable<int>(taxRate);
     return map;
   }
 
@@ -334,6 +390,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
           ? const Value.absent()
           : Value(deletedAt),
       splitMode: Value(splitMode),
+      taxMode: Value(taxMode),
+      taxRate: Value(taxRate),
     );
   }
 
@@ -353,6 +411,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       splitMode: serializer.fromJson<String>(json['splitMode']),
+      taxMode: serializer.fromJson<String>(json['taxMode']),
+      taxRate: serializer.fromJson<int>(json['taxRate']),
     );
   }
   @override
@@ -369,6 +429,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'splitMode': serializer.toJson<String>(splitMode),
+      'taxMode': serializer.toJson<String>(taxMode),
+      'taxRate': serializer.toJson<int>(taxRate),
     };
   }
 
@@ -383,6 +445,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? splitMode,
+    String? taxMode,
+    int? taxRate,
   }) => BillRow(
     id: id ?? this.id,
     title: title.present ? title.value : this.title,
@@ -394,6 +458,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     splitMode: splitMode ?? this.splitMode,
+    taxMode: taxMode ?? this.taxMode,
+    taxRate: taxRate ?? this.taxRate,
   );
   BillRow copyWithCompanion(BillsCompanion data) {
     return BillRow(
@@ -411,6 +477,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       splitMode: data.splitMode.present ? data.splitMode.value : this.splitMode,
+      taxMode: data.taxMode.present ? data.taxMode.value : this.taxMode,
+      taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
     );
   }
 
@@ -426,7 +494,9 @@ class BillRow extends DataClass implements Insertable<BillRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('splitMode: $splitMode')
+          ..write('splitMode: $splitMode, ')
+          ..write('taxMode: $taxMode, ')
+          ..write('taxRate: $taxRate')
           ..write(')'))
         .toString();
   }
@@ -443,6 +513,8 @@ class BillRow extends DataClass implements Insertable<BillRow> {
     updatedAt,
     deletedAt,
     splitMode,
+    taxMode,
+    taxRate,
   );
   @override
   bool operator ==(Object other) =>
@@ -457,7 +529,9 @@ class BillRow extends DataClass implements Insertable<BillRow> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.splitMode == this.splitMode);
+          other.splitMode == this.splitMode &&
+          other.taxMode == this.taxMode &&
+          other.taxRate == this.taxRate);
 }
 
 class BillsCompanion extends UpdateCompanion<BillRow> {
@@ -471,6 +545,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> splitMode;
+  final Value<String> taxMode;
+  final Value<int> taxRate;
   final Value<int> rowid;
   const BillsCompanion({
     this.id = const Value.absent(),
@@ -483,6 +559,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.splitMode = const Value.absent(),
+    this.taxMode = const Value.absent(),
+    this.taxRate = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BillsCompanion.insert({
@@ -496,6 +574,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.splitMode = const Value.absent(),
+    this.taxMode = const Value.absent(),
+    this.taxRate = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        currency = Value(currency),
@@ -515,6 +595,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? splitMode,
+    Expression<String>? taxMode,
+    Expression<int>? taxRate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -528,6 +610,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (splitMode != null) 'split_mode': splitMode,
+      if (taxMode != null) 'tax_mode': taxMode,
+      if (taxRate != null) 'tax_rate': taxRate,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -543,6 +627,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? splitMode,
+    Value<String>? taxMode,
+    Value<int>? taxRate,
     Value<int>? rowid,
   }) {
     return BillsCompanion(
@@ -556,6 +642,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       splitMode: splitMode ?? this.splitMode,
+      taxMode: taxMode ?? this.taxMode,
+      taxRate: taxRate ?? this.taxRate,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -593,6 +681,12 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
     if (splitMode.present) {
       map['split_mode'] = Variable<String>(splitMode.value);
     }
+    if (taxMode.present) {
+      map['tax_mode'] = Variable<String>(taxMode.value);
+    }
+    if (taxRate.present) {
+      map['tax_rate'] = Variable<int>(taxRate.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -612,6 +706,8 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('splitMode: $splitMode, ')
+          ..write('taxMode: $taxMode, ')
+          ..write('taxRate: $taxRate, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2866,6 +2962,8 @@ typedef $$BillsTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> splitMode,
+      Value<String> taxMode,
+      Value<int> taxRate,
       Value<int> rowid,
     });
 typedef $$BillsTableUpdateCompanionBuilder =
@@ -2880,6 +2978,8 @@ typedef $$BillsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> splitMode,
+      Value<String> taxMode,
+      Value<int> taxRate,
       Value<int> rowid,
     });
 
@@ -2999,6 +3099,16 @@ class $$BillsTableFilterComposer extends Composer<_$AppDatabase, $BillsTable> {
 
   ColumnFilters<String> get splitMode => $composableBuilder(
     column: $table.splitMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taxMode => $composableBuilder(
+    column: $table.taxMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taxRate => $composableBuilder(
+    column: $table.taxRate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3136,6 +3246,16 @@ class $$BillsTableOrderingComposer
     column: $table.splitMode,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get taxMode => $composableBuilder(
+    column: $table.taxMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$BillsTableAnnotationComposer
@@ -3180,6 +3300,12 @@ class $$BillsTableAnnotationComposer
 
   GeneratedColumn<String> get splitMode =>
       $composableBuilder(column: $table.splitMode, builder: (column) => column);
+
+  GeneratedColumn<String> get taxMode =>
+      $composableBuilder(column: $table.taxMode, builder: (column) => column);
+
+  GeneratedColumn<int> get taxRate =>
+      $composableBuilder(column: $table.taxRate, builder: (column) => column);
 
   Expression<T> peopleRefs<T extends Object>(
     Expression<T> Function($$PeopleTableAnnotationComposer a) f,
@@ -3299,6 +3425,8 @@ class $$BillsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> splitMode = const Value.absent(),
+                Value<String> taxMode = const Value.absent(),
+                Value<int> taxRate = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BillsCompanion(
                 id: id,
@@ -3311,6 +3439,8 @@ class $$BillsTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 splitMode: splitMode,
+                taxMode: taxMode,
+                taxRate: taxRate,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3325,6 +3455,8 @@ class $$BillsTableTableManager
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> splitMode = const Value.absent(),
+                Value<String> taxMode = const Value.absent(),
+                Value<int> taxRate = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BillsCompanion.insert(
                 id: id,
@@ -3337,6 +3469,8 @@ class $$BillsTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 splitMode: splitMode,
+                taxMode: taxMode,
+                taxRate: taxRate,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

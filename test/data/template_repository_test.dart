@@ -105,13 +105,15 @@ void main() {
     'upgrading a version-1 database adds templates with the default',
     () async {
       // A realistic schema-1 database: today's schema minus what versions
-      // 2 and 3 added (templates table, bills.split_mode).
+      // 2-4 added (templates table, bills.split_mode, bills tax columns).
       final file = File(
         '${Directory.systemTemp.createTempSync('fixer').path}/v1.sqlite',
       );
       final current = AppDatabase(NativeDatabase(file));
       await current.customStatement('DROP TABLE message_templates');
       await current.customStatement('ALTER TABLE bills DROP COLUMN split_mode');
+      await current.customStatement('ALTER TABLE bills DROP COLUMN tax_mode');
+      await current.customStatement('ALTER TABLE bills DROP COLUMN tax_rate');
       await current.customStatement('PRAGMA user_version = 1');
       await current.close();
 

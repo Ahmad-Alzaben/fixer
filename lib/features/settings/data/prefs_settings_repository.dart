@@ -1,5 +1,6 @@
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/theme/app_accent.dart';
+import 'package:fixer/features/bill/domain/bill.dart';
 import 'package:fixer/features/settings/application/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +13,8 @@ class PrefsSettingsRepository implements SettingsRepository {
   static const _nameKey = 'yourName';
   static const _currencyKey = 'defaultCurrency';
   static const _countryKey = 'countryCode';
+  static const _taxRateKey = 'taxRate';
+  static const _taxModeKey = 'defaultTaxMode';
 
   @override
   AppAccent get accent => AppAccent.fromName(_prefs.getString(_accentKey));
@@ -42,4 +45,20 @@ class PrefsSettingsRepository implements SettingsRepository {
   @override
   Future<void> setCountryCode(String digits) =>
       _prefs.setString(_countryKey, digits);
+
+  @override
+  int get taxRate => _prefs.getInt(_taxRateKey) ?? defaultTaxRate;
+
+  @override
+  Future<void> setTaxRate(int rate) => _prefs.setInt(_taxRateKey, rate);
+
+  @override
+  TaxMode get defaultTaxMode => TaxMode.values.firstWhere(
+    (m) => m.name == _prefs.getString(_taxModeKey),
+    orElse: () => TaxMode.none,
+  );
+
+  @override
+  Future<void> setDefaultTaxMode(TaxMode mode) =>
+      _prefs.setString(_taxModeKey, mode.name);
 }
