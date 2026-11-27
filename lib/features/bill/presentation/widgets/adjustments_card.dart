@@ -38,7 +38,9 @@ class AdjustmentsCard extends ConsumerWidget {
         leading: const Icon(Icons.percent),
         title: const Text('Fees & discount'),
         subtitle: Text(anySet ? parts.join(' · ') : 'None'),
-        childrenPadding: const EdgeInsets.fromLTRB(Gap.m, 0, Gap.m, Gap.m),
+        // Top padding leaves room for the first field's floating label, which
+        // sits above the field's border and was clipped with 0 here.
+        childrenPadding: const EdgeInsets.fromLTRB(Gap.m, Gap.m, Gap.m, Gap.m),
         children: [
           _MoneyField(
             label: 'Service fee',

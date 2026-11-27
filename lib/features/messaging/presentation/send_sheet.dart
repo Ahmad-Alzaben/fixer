@@ -48,19 +48,23 @@ class _SendSheetState extends ConsumerState<_SendSheet> {
   List<MessageTemplate> _templates = const [MessageTemplate.builtIn];
   String? _templateId;
 
+  /// True once the user picked a template or typed in the message; from then
+  /// on their choice wins over the saved default.
+  bool _userChose = false;
+
   @override
   void initState() {
     super.initState();
     _apply(MessageTemplate.builtIn);
-    // Start from the saved default once templates load (usually at once).
+    // Show the SAVED default as soon as templates load (usually at once).
+    // Always use the stored template, never the built-in constant: the user
+    // may have edited the default without changing its id.
     ref.listenManual(templatesProvider, (_, next) {
       final list = next.value;
       if (list == null || list.isEmpty) return;
-      final firstLoad =
-          _templateId == MessageTemplate.builtIn.id &&
-          !list.any((t) => t.id == MessageTemplate.builtIn.id && t.isDefault);
       setState(() => _templates = list);
-      if (firstLoad || !list.any((t) => t.id == _templateId)) {
+      final chosenStillExists = list.any((t) => t.id == _templateId);
+      if (!_userChose || !chosenStillExists) {
         _apply(MessageTemplate.pickDefault(list));
       }
     }, fireImmediately: true);
@@ -138,14 +142,16 @@ class _SendSheetState extends ConsumerState<_SendSheet> {
                 for (final t in _templates)
                   DropdownMenuItem(value: t.id, child: Text(t.name)),
               ],
-              onChanged: (id) => setState(
-                () => _apply(_templates.firstWhere((t) => t.id == id)),
-              ),
+              onChanged: (id) => setState(() {
+                _userChose = true;
+                _apply(_templates.firstWhere((t) => t.id == id));
+              }),
             ),
             const SizedBox(height: Gap.m),
           ],
           TextField(
             controller: _message,
+            onChanged: (_) => _userChose = true,
             minLines: 4,
             maxLines: 10,
             decoration: const InputDecoration(labelText: 'Message'),
