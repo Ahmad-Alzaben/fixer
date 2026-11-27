@@ -1,6 +1,7 @@
 import 'package:fixer/core/money/money.dart';
 import 'package:fixer/core/platform/share_gateway.dart';
 import 'package:fixer/core/theme/app_theme.dart';
+import 'package:fixer/core/widgets/fit_amount.dart';
 import 'package:fixer/core/widgets/section_label.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
@@ -156,7 +157,7 @@ class _AmountLine extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(color: muted),
             ),
           ),
-          Text(
+          FitAmount(
             '$sign${amount.toDecimalString()}',
             style: theme.textTheme.amount.copyWith(fontSize: 14),
           ),
@@ -193,10 +194,23 @@ class _ShareActions extends ConsumerWidget {
         ),
         const SizedBox(width: Gap.m),
         Expanded(
-          child: FilledButton.icon(
-            icon: const Icon(Icons.share),
-            label: const Text('Share'),
-            onPressed: () => gateway.share(text, subject: bill.title),
+          // Builder gives the button's own context, so the share sheet can
+          // be anchored to it (required on iPad).
+          child: Builder(
+            builder: (buttonContext) => FilledButton.icon(
+              icon: const Icon(Icons.share),
+              label: const Text('Share'),
+              onPressed: () {
+                final box = buttonContext.findRenderObject() as RenderBox?;
+                gateway.share(
+                  text,
+                  subject: bill.title,
+                  origin: box == null
+                      ? null
+                      : box.localToGlobal(Offset.zero) & box.size,
+                );
+              },
+            ),
           ),
         ),
       ],

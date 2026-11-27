@@ -24,7 +24,12 @@ class FakeShareGateway implements ShareGateway {
   Future<void> copy(String text) async => copied.add(text);
 
   @override
-  Future<void> share(String text, {String? subject}) async => shared.add(text);
+  Future<void> share(String text, {String? subject, Rect? origin}) async {
+    shared.add(text);
+    origins.add(origin);
+  }
+
+  final origins = <Rect?>[];
 }
 
 class FakeContactsGateway implements ContactsGateway {

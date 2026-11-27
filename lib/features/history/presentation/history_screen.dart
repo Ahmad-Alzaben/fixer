@@ -1,4 +1,5 @@
 import 'package:fixer/core/theme/app_theme.dart';
+import 'package:fixer/core/widgets/fit_amount.dart';
 import 'package:fixer/core/widgets/section_label.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/application/providers.dart';
@@ -215,7 +216,7 @@ class _BillTile extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: Gap.s),
-              Text(total.toString(), style: theme.textTheme.amount),
+              FitAmount(total.toString(), style: theme.textTheme.amount),
               PopupMenuButton<_BillAction>(
                 tooltip: 'Options for $title',
                 onSelected: (action) => _onAction(context, ref, action),

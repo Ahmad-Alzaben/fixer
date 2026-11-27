@@ -67,7 +67,7 @@ class _AddPersonFieldState extends ConsumerState<AddPersonField> {
           ],
         ),
       );
-      if (phone == null) return; // dialog dismissed
+      if (phone == null || !mounted) return; // dismissed or screen closed
     }
     ref
         .read(billEditorProvider.notifier)

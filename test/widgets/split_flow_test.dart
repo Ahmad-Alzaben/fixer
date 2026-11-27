@@ -74,6 +74,9 @@ void main() {
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
     expect(share.shared.single, contains('O: 2.396 JOD'));
+    // Anchored to the Share button (needed for the iPad popover).
+    final origin = share.origins.single!;
+    expect(origin.contains(tester.getCenter(find.text('Share'))), isTrue);
   });
 
   testWidgets('discount larger than the bill shows a warning', (tester) async {

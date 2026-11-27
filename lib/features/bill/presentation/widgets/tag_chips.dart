@@ -61,10 +61,12 @@ class _TagSheetState extends ConsumerState<_TagSheet> {
     if (name.isEmpty) return;
     try {
       final tag = await ref.read(tagRepositoryProvider).create(name);
+      if (!mounted) return;
       ref.read(billEditorProvider.notifier).toggleTag(tag.id);
       _controller.clear();
       setState(() => _error = null);
     } on ArgumentError {
+      if (!mounted) return;
       setState(() => _error = 'That tag already exists');
     }
   }

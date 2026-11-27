@@ -18,7 +18,8 @@ Flutter app, Android first (iOS-ready structure). Dark, cyberpunk-inspired theme
 - ✅ Monthly report of your own share, by tag, with recent months
 - ✅ Saved message templates (one default), placeholders, live preview
 - ✅ Settings: your name (auto-marks "Me"), default currency, country code
-- ⏳ App icon, Phase 4 review (accessibility, edge cases, iOS readiness)
+- ✅ Phase 4 review: accessibility, large text, limits, iOS project ([report](docs/PHASE4_REVIEW.md))
+- ⏳ App icon; iOS build needs a Mac
 
 ## Run
 ```sh

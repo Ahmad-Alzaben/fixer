@@ -6,7 +6,10 @@ import 'package:share_plus/share_plus.dart';
 /// UI can be tested without platform plugins (Adapter).
 abstract interface class ShareGateway {
   Future<void> copy(String text);
-  Future<void> share(String text, {String? subject});
+
+  /// [origin] is the on-screen rectangle of the button that opened the share
+  /// sheet. iPad requires it to position the popover; phones ignore it.
+  Future<void> share(String text, {String? subject, Rect? origin});
 }
 
 class PlatformShareGateway implements ShareGateway {
@@ -17,8 +20,10 @@ class PlatformShareGateway implements ShareGateway {
       Clipboard.setData(ClipboardData(text: text));
 
   @override
-  Future<void> share(String text, {String? subject}) =>
-      SharePlus.instance.share(ShareParams(text: text, subject: subject));
+  Future<void> share(String text, {String? subject, Rect? origin}) =>
+      SharePlus.instance.share(
+        ShareParams(text: text, subject: subject, sharePositionOrigin: origin),
+      );
 }
 
 final shareGatewayProvider = Provider<ShareGateway>(

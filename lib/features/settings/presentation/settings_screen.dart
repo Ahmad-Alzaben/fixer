@@ -136,9 +136,9 @@ class _CountryCodeFieldState extends ConsumerState<_CountryCodeField> {
   Future<void> _changed(String value) async {
     try {
       await ref.read(preferencesProvider.notifier).setCountryCode(value);
-      if (_error != null) setState(() => _error = null);
+      if (mounted && _error != null) setState(() => _error = null);
     } on ArgumentError {
-      setState(() => _error = 'Digits only, e.g. 962');
+      if (mounted) setState(() => _error = 'Digits only, e.g. 962');
     }
   }
 

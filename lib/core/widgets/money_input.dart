@@ -1,4 +1,5 @@
 import 'package:fixer/core/money/currency.dart';
+import 'package:fixer/core/money/money.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -8,9 +9,10 @@ const moneyKeyboard = TextInputType.numberWithOptions(decimal: true);
 /// Only lets the user type a non-negative amount with at most the
 /// currency's number of decimals (e.g. 3 for JOD).
 List<TextInputFormatter> moneyInputFormatters(Currency currency) {
+  const whole = '\\d{0,${Money.maxWholeDigits}}';
   final pattern = currency.minorDigits == 0
-      ? RegExp(r'^\d*$')
-      : RegExp('^\\d*\\.?\\d{0,${currency.minorDigits}}\$');
+      ? RegExp('^$whole\$')
+      : RegExp('^$whole(\\.\\d{0,${currency.minorDigits}})?\$');
   return [
     TextInputFormatter.withFunction(
       (oldValue, newValue) =>

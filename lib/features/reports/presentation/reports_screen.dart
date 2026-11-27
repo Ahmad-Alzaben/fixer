@@ -1,5 +1,6 @@
 import 'package:fixer/core/money/money.dart';
 import 'package:fixer/core/theme/app_theme.dart';
+import 'package:fixer/core/widgets/fit_amount.dart';
 import 'package:fixer/core/widgets/section_label.dart';
 import 'package:fixer/features/bill/application/providers.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
@@ -219,7 +220,7 @@ class _BarRow extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
-              Text(
+              FitAmount(
                 amount.toString(),
                 style: theme.textTheme.amount.copyWith(fontSize: 14),
               ),

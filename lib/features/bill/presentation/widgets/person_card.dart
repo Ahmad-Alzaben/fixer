@@ -1,6 +1,7 @@
 import 'package:fixer/core/money/currency.dart';
 import 'package:fixer/core/money/money.dart';
 import 'package:fixer/core/theme/app_theme.dart';
+import 'package:fixer/core/widgets/fit_amount.dart';
 import 'package:fixer/core/widgets/money_input.dart';
 import 'package:fixer/features/bill/application/bill_editor.dart';
 import 'package:fixer/features/bill/domain/bill.dart';
@@ -51,7 +52,7 @@ class PersonCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: Gap.s),
-                Text(subtotal.toString(), style: theme.textTheme.amount),
+                FitAmount(subtotal.toString(), style: theme.textTheme.amount),
                 _PersonMenu(person: person),
               ],
             ),
@@ -188,7 +189,8 @@ class _ItemRow extends ConsumerWidget {
       child: InkWell(
         onTap: () => showEditItemDialog(context, ref, person.id, item),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 40),
+          // 48dp: Android's minimum touch target.
+          constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
             padding: const EdgeInsets.only(right: Gap.m),
             child: Row(
@@ -204,7 +206,7 @@ class _ItemRow extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Text(
+                FitAmount(
                   item.price.toDecimalString(),
                   style: theme.textTheme.amount,
                 ),

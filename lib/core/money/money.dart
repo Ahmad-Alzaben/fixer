@@ -13,6 +13,10 @@ class Money implements Comparable<Money> {
 
   static final _pattern = RegExp(r'^(\d+)(?:\.(\d+))?$');
 
+  /// Largest accepted amount is 999,999,999 in the major unit, which keeps
+  /// every sum far inside 64-bit integers.
+  static const maxWholeDigits = 9;
+
   /// Parses a non-negative decimal string such as `"1.45"`.
   ///
   /// Throws [FormatException] for negative, malformed, or over-precise input.
@@ -24,6 +28,9 @@ class Money implements Comparable<Money> {
     }
     final whole = match.group(1)!;
     final fraction = match.group(2) ?? '';
+    if (whole.replaceFirst(RegExp(r'^0+'), '').length > maxWholeDigits) {
+      throw FormatException('Amount is too large', input);
+    }
     if (fraction.length > currency.minorDigits) {
       throw FormatException(
         '${currency.code} allows at most ${currency.minorDigits} decimals',
