@@ -21,6 +21,29 @@ Flutter app, Android first, iOS later. Source of truth: `docs/BRIEF.md`, `docs/P
 - `verification-before-completion`: run `flutter test` / `flutter analyze` and read the output before claiming anything passes.
 - `dart-flutter-patterns`, `flutter-dart-code-review`: Flutter idioms and review checklist, subject to the rules above.
 
+## Current state (handoff)
+- **Released:** v1.0.3 (all phases of the brief done, plus icon, CI/CD, release signing). Repo: `github.com/Ahmad-Alzaben/fixer` (public). Owner tests on a OnePlus Nord CE 3 Lite (arm64) and a Samsung.
+- **Owner decisions so far:** JOD 3 decimals; new bills split fees/discount **equally**, per-bill switch to **by order**; several tags per bill; reports = owner's "Me" share only; several message templates, exactly one default; dark only, preset accents.
+- **Open items / known limitations:** `docs/PHASE4_REVIEW.md` (tag rename/delete, Arabic/RTL, TalkBack pass, bundled font, iOS needs a Mac + Apple account for signed builds).
+
+## How to work on this repo
+- **Verify:** `flutter analyze` and `flutter test` (189+ tests). Database tests use Windows' built-in `winsqlite3.dll` via `test/support/test_database.dart`; CI installs `libsqlite3-dev`.
+- **Bugs:** reproduce first with a failing test in `test/widgets/regressions_test.dart` (or a unit test), then fix. Widget tests use `test/support/app_harness.dart` (`pumpApp`, fakes for storage, contacts, sharing, launcher). IDs in tests are `id0` (bill), `id1`… in creation order.
+- **Database (Drift 2.28, pinned by Flutter 3.35's analyzer):** after changing tables run `dart run build_runner build --delete-conflicting-outputs`, bump `schemaVersion` (now 3), add an `onUpgrade` step, and add an upgrade test that starts from a realistic old database (see `test/data/*`). Rows are sync-ready: UUID ids, `updatedAt`, soft delete via `deletedAt`.
+- **Commits:** only when the owner asks ("commit and push"). Never stage `android/key.properties`, `*.jks`, `*.apk`, `*.ipa`, `release/`.
+
+## Releasing
+- Bump `version:` in `pubspec.yaml` (the name, e.g. `1.0.4+5`; CI sets the build number to 100 + run number so every APK updates the previous one).
+- Push to `main` → `.github/workflows/release.yml` runs tests, builds signed Android APKs (arm64 + universal) and an **unsigned** iOS `.ipa`, and publishes GitHub Release `v<version>-build.<n>`. Watch with `gh run watch` (`C:\Program Files\GitHub CLI\gh.exe`; logged in as Ahmad-Alzaben).
+- Signing: upload key at `C:\Users\Asus\.android-keys\fixer-upload.jks`; CI reads it from repo secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, `ANDROID_KEY_ALIAS`. Local release builds use the owner's git-ignored `android/key.properties`: **never open or print it**.
+- Checking a signature: `apksigner verify --print-certs` (needs `JAVA_HOME` = `C:\Program Files\Android\Android Studio\jbr`; the system `JAVA_HOME` on this PC points to a missing `jre` folder). Expected signer: `CN=Fixer, O=Fixer`.
+
+## Emulator testing
+- AVD `Pixel_9` (`flutter emulators --launch Pixel_9`); adb at `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`.
+- The installed Fixer is release-signed: install **release** builds over it (`flutter build apk --release`); a debug build needs an uninstall first.
+- 3-button navigation (like the owner's Samsung) is enabled via the `navbar.threebutton` overlay. Some Samsung inset bugs don't reproduce on the emulator; regression tests simulate them (`tester.view.viewInsets`).
+- Icon source: `docs/icon/fixer-icon.svg` (original design); regenerate all sizes with `docs/icon/make_icons.ps1`.
+
 ## Behavioral guidelines
 *(From the andrej-karpathy-skills `CLAUDE.md`, lightly trimmed.)*
 
